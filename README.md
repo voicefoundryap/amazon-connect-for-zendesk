@@ -7,11 +7,11 @@ Since the app is open source you're free to make a fork of the repo, make modifi
 - make a private app and install it in your Zendesk account, or
 - raise a pull request to contribute your changes to the official version
 ## Making and installing your private Zendesk app
-After forking the repo into your GitHub account and making desired changes to it, use you favorite zip archiver app to create a zip package containing the following folders and files:
+After forking the repo into your GitHub account and making desired changes to it, use you favorite zip archiver app to create a zip package containing the contents of the `/src` folder :
 ```
-/src/assets
-/src/translations
-/src/manifest.json
+/assets
+/translations
+/manifest.json
 ```
 Then install it as a private app in your Zendesk account, following [these instructions↗](https://support.zendesk.com/hc/en-us/articles/203662486-Managing-your-installed-apps#topic_x3y_r22_r5).
 ## Contributing to the marketplace version of the app
