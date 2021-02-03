@@ -15,15 +15,18 @@ export const processInboundCall = async (contact) => {
     console.log(logStamp("Attributes map: "), contact.getAttributes());
     let autoAssignTickets = determineAssignmentBehavior();
 
-    let ticket = {}, ticketId;
+    let ticket = {};
     const appSettings = session.zafInfo.settings;
+    let ticketId = appSettings.zendeskTicket;   // in case existing ticket was passed via an attribute
 
     if (session.isTransfer) {
-        ticketId = await findTicket(session.contact.initialContactId);
+        if (!ticketId)
+            ticketId = await findTicket(session.contact.initialContactId);
         if (!ticketId) {
             // ticket being transferred was not found. This could be due to first agent not creating it
             // or, on a rare occassion, due to Zendesk indexing delay.
             // Either way we will switch to agent assignment mode.
+            session.zafInfo.settings.createAssignTickets = 'agent';
             autoAssignTickets = false;
             const message = 'No ticket was found related to transfer.\n Reverting to manual mode';
             zafClient.invoke('notify', message, 'alert', { sticky: true });
@@ -32,24 +35,20 @@ export const processInboundCall = async (contact) => {
             ticket.fromTransfer = true;
         }
 
-    } else {
-        ticketId = appSettings.zendeskTicket;
-        // check if ticket id was passed via an attribute and then validate it
-        if (ticketId != null) {
-            if (ticketId === '0') {
+    } else if (ticketId != null) {
+        if (ticketId === '0') {
+            ticket = { ticketId: 0 }
+            if (!autoAssignTickets) {
+                // Set as 0 in the contact flow, alert the agent that customer wants to open a new ticket 
+                const message = 'Request to open a new ticket received';
+                zafClient.invoke('notify', message, 'alert', { sticky: false });
+            }
+        } else {
+            ticket = await validateTicket(ticketId);
+            if (!ticket.ticketId) {
+                const message = `Requested ticket #${ticketId} was not found`;
+                zafClient.invoke('notify', message, 'alert', { sticky: true });
                 ticket = { ticketId: 0 }
-                if (!autoAssignTickets) {
-                    // Set as 0 in the contact flow, alert the agent that customer wants to open a new ticket 
-                    const message = 'Request to open a new ticket received';
-                    zafClient.invoke('notify', message, 'alert', { sticky: false });
-                }
-            } else {
-                ticket = await validateTicket(ticketId);
-                if (!ticket.ticketId) {
-                    const message = `Requested ticket #${ticketId} was not found`;
-                    zafClient.invoke('notify', message, 'alert', { sticky: true });
-                    ticket = { ticketId: 0 }
-                }
             }
         }
     }

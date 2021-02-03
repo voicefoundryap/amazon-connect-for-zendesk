@@ -145,7 +145,8 @@ const handleContactEnded = async () => {
 }
 
 const handleIncomingCallback = async () => {
-    // not implemented, left for future enhancements
+    // console.log(logStamp(`handleIncomingCallback`));
+    zafClient.invoke('popover', 'show');
 }
 
 const logContactState = (contact, handlerName, description) => {
@@ -186,7 +187,7 @@ export default (contact) => {
         console.log(logStamp('is it monitoring? '), session.isMonitoring);
         // is this call a transfer?
         const data = currentContact.snapshot.contactData;
-        session.isTransfer = data.initialContactId && data.initialContactId !== data.contactId;
+        session.isTransfer = data.type !== "queue_callback" && data.initialContactId && data.initialContactId !== data.contactId;
         currentContact.initialContactId = data.initialContactId;
         console.log(logStamp('is it a transfer? '), session.isTransfer);
 
