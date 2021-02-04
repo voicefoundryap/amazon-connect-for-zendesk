@@ -82,6 +82,11 @@
       "name": "zendeskTicket",
       "type": "text",
       "default": "zendesk_ticket"
+    },
+    {
+      "name": "medialess",
+      "type": "checkbox",
+      "default": false
     }
   ],
   "version": "2.1.2",

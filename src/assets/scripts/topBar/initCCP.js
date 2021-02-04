@@ -24,17 +24,17 @@ export default (appSettings, ccpContainerId) => {
             console.error(logStamp('App named "AWS Connector" not found'));
     }).catch((err) => { console.error(logStamp('getting installed apps'), err) });
 
-    // console.log(logStamp('ccpInit'));
     const ccpParams = {
         ccpUrl: appSettings.connectInstanceUrl + "/connect/ccp-v2#",
         loginPopup: true, // TODO: display login popup within the app iframe, not as a new tab
         softphone: {
-            allowFramedSoftphone: true
+            allowFramedSoftphone: !appSettings.medialess
         }
     };
     if (appSettings.ssoSignInUrl)
-        ccpParams.loginUrl = appSettings.ssoSignInUrl;
-
+    ccpParams.loginUrl = appSettings.ssoSignInUrl;
+    
+    // console.log(logStamp('ccpInit with params: '), ccpParams);
     try {
         connect.core.initCCP(document.getElementById(ccpContainerId), ccpParams);
     } catch (err) {

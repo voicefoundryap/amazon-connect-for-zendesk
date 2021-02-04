@@ -28,6 +28,10 @@
       "createTicketAfterMinutes": {
         "label": "Create ticket after minutes",
         "helpText": "This setting controls whether a recent ticket of a recognised caller should be opened instead of creating a new one. If there's no ticket updated within the specified time then new ticket will be created. It can be overridden by setting the `recent_ticket_timeout` attribute in your contact flow."
+      },
+      "medialess": {
+        "label": "Use media-less mode",
+        "helpText": "This setting disables the media channel on the integrated softphone. An instance of Connect Control Panel (CCP) should be opened in an independent window or tab before launching this app."
       }
     }
   }
