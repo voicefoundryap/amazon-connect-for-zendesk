@@ -10,54 +10,61 @@ import {
 
 export const processInboundCall = async (contact) => {
     console.log(logStamp('Processing inbound call on contact'), contact);
+    console.log(logStamp("Attributes map: "), contact.getAttributes());
 
     session.phoneNo = contact.customerNo;
-    console.log(logStamp("Attributes map: "), contact.getAttributes());
+    let ticketId, user, userId;
     let autoAssignTickets = determineAssignmentBehavior();
-
-    let ticket = {};
     const appSettings = session.zafInfo.settings;
-    let ticketId = appSettings.zendeskTicket;   // in case existing ticket was passed via an attribute
 
-    if (session.isTransfer) {
-        if (!ticketId)
-            ticketId = await findTicket(session.contact.initialContactId);
-        if (!ticketId) {
-            // ticket being transferred was not found. This could be due to first agent not creating it
-            // or, on a rare occassion, due to Zendesk indexing delay.
-            // Either way we will switch to agent assignment mode.
-            session.zafInfo.settings.createAssignTickets = 'agent';
-            autoAssignTickets = false;
-            const message = 'No ticket was found related to transfer.\n Reverting to manual mode';
-            zafClient.invoke('notify', message, 'alert', { sticky: true });
-        } else {
-            ticket = await validateTicket(ticketId);
-            ticket.fromTransfer = true;
-        }
+    if (session.callInProgress) {
+        ticketId = session.ticketId;
+        user = session.user;
+    } else {
 
-    } else if (ticketId != null) {
-        if (ticketId === '0') {
-            ticket = { ticketId: 0 }
-            if (!autoAssignTickets) {
-                // Set as 0 in the contact flow, alert the agent that customer wants to open a new ticket 
-                const message = 'Request to open a new ticket received';
-                zafClient.invoke('notify', message, 'alert', { sticky: false });
-            }
-        } else {
-            ticket = await validateTicket(ticketId);
-            if (!ticket.ticketId) {
-                const message = `Requested ticket #${ticketId} was not found`;
+        let ticket = {};
+        ticketId = appSettings.zendeskTicket;   // in case existing ticket was passed via an attribute
+
+        if (session.isTransfer) {
+            if (!ticketId)
+                ticketId = await findTicket(session.contact.initialContactId);
+            if (!ticketId) {
+                // ticket being transferred was not found. This could be due to first agent not creating it
+                // or, on a rare occassion, due to Zendesk indexing delay.
+                // Either way we will switch to agent assignment mode.
+                session.zafInfo.settings.createAssignTickets = 'agent';
+                autoAssignTickets = false;
+                const message = 'No ticket was found related to transfer.\n Reverting to manual mode';
                 zafClient.invoke('notify', message, 'alert', { sticky: true });
+            } else {
+                ticket = await validateTicket(ticketId);
+                ticket.fromTransfer = true;
+            }
+
+        } else if (ticketId != null) {
+            if (ticketId === '0') {
                 ticket = { ticketId: 0 }
+                if (!autoAssignTickets) {
+                    // Set as 0 in the contact flow, alert the agent that customer wants to open a new ticket 
+                    const message = 'Request to open a new ticket received';
+                    zafClient.invoke('notify', message, 'alert', { sticky: false });
+                }
+            } else {
+                ticket = await validateTicket(ticketId);
+                if (!ticket.ticketId) {
+                    const message = `Requested ticket #${ticketId} was not found`;
+                    zafClient.invoke('notify', message, 'alert', { sticky: true });
+                    ticket = { ticketId: 0 }
+                }
             }
         }
-    }
-    ticketId = ticket.ticketId;
+        ticketId = ticket.ticketId;
 
-    // then attempt to find the user
-    let user = ticket.fromTransfer
-        ? await getUserById(ticket.requester)
-        : await resolveUser(contact, ticket.requester);
+        // then attempt to find the user
+        user = ticket.fromTransfer
+            ? await getUserById(ticket.requester)
+            : await resolveUser(contact, ticket.requester);
+    }
 
     if (user) {
         session.user = user;
@@ -71,7 +78,9 @@ export const processInboundCall = async (contact) => {
         ticketId = null;
     }
 
-    const userId = user ? user.id : null;
+    userId = user ? user.id : null;
+    if (userId)
+        localStorage.setItem('vf.currentUserId', userId);
 
     // for a known user select the most recent open ticket within the set timeframe
     // unless new ticket was explicitly requested
@@ -79,6 +88,8 @@ export const processInboundCall = async (contact) => {
         const recentTicket = await findMostRecentTicket(userId);
         ticketId = recentTicket.id;
     }
+    if (ticketId) 
+        localStorage.setItem('vf.currentTicketId', ticketId);
 
     if (userId && ticketId) {
         // we have both the user and the ticket
@@ -88,7 +99,8 @@ export const processInboundCall = async (contact) => {
         if (session.state.connected) {
             if (autoAssignTickets) {
                 // assign this ticket to call and attach contact details automatically
-                await appendTicketComments.appendContactDetails(session.contact, ticketId);
+                if (!session.callInProgress)    // and app was not reloaded in the middle of a call
+                    await appendTicketComments.appendContactDetails(session.contact, ticketId);
                 zafClient.invoke('popover', 'hide');
             } else
                 resize('full');
@@ -116,6 +128,7 @@ export const processInboundCall = async (contact) => {
                     await appendTicketComments.appendContactDetails(session.contact, ticketId);
                     await popTicket(session.zenAgentId, ticketId);
                     zafClient.invoke('popover', 'hide');
+                    localStorage.setItem('vf.currentTicketId', ticketId);
                 }
             } else {
                 await popUser(session.zenAgentId, userId);
@@ -135,6 +148,7 @@ export const processInboundCall = async (contact) => {
                 await appendTicketComments.appendContactDetails(session.contact, ticketId);
                 await popTicket(session.zenAgentId, ticketId);
                 zafClient.invoke('popover', 'hide');
+                localStorage.setItem('vf.currentTicketId', ticketId);
             }
         } else
             resize('full');

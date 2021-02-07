@@ -14,24 +14,34 @@ export const processOutboundCall = async (contact) => {
 
     const autoAssignTickets = determineAssignmentBehavior();
 
-    // attempt to resolve user first
-    const user = await resolveUser(contact, null, dialOut).catch((err) => {
-        console.error(logStamp('processOutboundCall'), err);
-        return null;
-    });
+    let user, userId, ticketId;
+    if (session.callInProgress) {
+        ticketId = session.ticketId;
+        user = session.user;
+    } else {
+        // attempt to resolve user first
+        user = await resolveUser(contact, null, dialOut).catch((err) => {
+            console.error(logStamp('processOutboundCall'), err);
+            return null;
+        });
+    }
 
     if (user) {
         // recognised user from either the dial pad or a dial-out event
         console.log(logStamp('resolved user'), user);
         session.user = user;
-        const userId = user.id;
+        userId = user.id;
+        localStorage.setItem('vf.currentUserId', userId);
 
-        // determine the ticket from the dialout event
-        let ticketId = dialOut ? dialOut.ticketId : null;
+        // for a new call determine the ticket from the dialout event
+        ticketId = ticketId || (dialOut ? dialOut.ticketId : null);
 
         if (ticketId) {
             // currently open zendesk ticket was obtained from the dialOut event
-            await appendTicketComments.appendContactDetails(contact, ticketId);
+            if (!session.callInProgress) {
+                await appendTicketComments.appendContactDetails(contact, ticketId);
+                localStorage.setItem('vf.currentTicketId', ticketId);
+            }
         } else {
             if (autoAssignTickets) {
                 // create new ticket for the user
@@ -39,6 +49,7 @@ export const processOutboundCall = async (contact) => {
                 if (ticketId) {
                     await appendTicketComments.appendContactDetails(contact, ticketId);
                     await popTicket(session.zenAgentId, ticketId);
+                    localStorage.setItem('vf.currentTicketId', ticketId);
                     zafClient.invoke('popover', 'hide');
                 }
             } else {
@@ -62,6 +73,7 @@ export const processOutboundCall = async (contact) => {
         if (ticketInstances.length) {
             const ticketId = session.currentTabTicket;
             await appendTicketComments.appendContactDetails(contact, ticketId);
+            localStorage.setItem('vf.currentTicketId', ticketId);
             zafClient.invoke('popover', 'hide');
         }
     }

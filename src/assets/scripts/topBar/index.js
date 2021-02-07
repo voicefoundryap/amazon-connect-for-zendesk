@@ -5,10 +5,26 @@ import { zafClient, zafInit } from './zafClient.js';
 import appendTicketComments from './appendTicketComments.js';
 import { dialableNumber } from './phoneNumbers.js'
 import newTicket from './newTicket.js';
-import { resize, popTicket } from './core.js';
+import { resize, popTicket, determineAssignmentBehavior } from './core.js';
 import ui from './ui.js'
 
 window.onload = (event) => {
+    // first, establish the window (tab) id
+    const windowIdKey = "vf.windowId"
+    let windowId = sessionStorage.getItem(windowIdKey);
+    if (!windowId) {
+        windowId = uuidv4();
+        console.log(logStamp('new window/tab opened'), windowId);
+    }
+    else {
+        sessionStorage.removeItem(windowIdKey);
+        console.log(logStamp('reloaded window/tab'), windowId);
+    }
+    session.windowId = windowId;
+    window.addEventListener("beforeunload", () => {
+        sessionStorage.setItem(windowIdKey, windowId)
+    });
+
     window.vfConnectTimeout = window.setTimeout(() => {
         // ui.swapImage('loadingImg', 'prohibited.png');
         ui.show('whitelisting');
@@ -31,6 +47,7 @@ window.onload = (event) => {
             // immediately update with call attributes, before popping to the agent
             resize('down');
             await appendTicketComments.appendContactDetails(session.contact, ticketId);
+            localStorage.setItem('vf.currentTicketId', ticketId);
             zafClient.invoke('popover', 'hide');
         }
     });
@@ -51,6 +68,10 @@ window.onload = (event) => {
                 zafClient.on('instance.registered', onInstanceRegistered);
                 zafClient.on("voice.dialout", onDialout);
                 zafClient.on('vf.tab_switched', onTabSwitched);
+                zafClient.on('app.deactivated', async () => {
+                    console.log(logStamp("unloading topbar"));
+                    sessionStorage.setItem(windowIdKey, windowId)
+                });
             });
 
         });
@@ -95,7 +116,7 @@ const onDialout = (dialOut) => {
 };
 
 const onInstanceRegistered = async (context) => {
-    console.log(logStamp('onInstanceRegistered'), context);
+    // console.log(logStamp('onInstanceRegistered'), context);
 
     const contact = session.contact;
     if (!contact.contactId)
@@ -107,7 +128,8 @@ const onInstanceRegistered = async (context) => {
             localStorage.setItem('vf.transcript-init', session.transcriptHtml);
         }
 
-        if (context.location === 'new_ticket_sidebar') {
+        const autoAssignTickets = determineAssignmentBehavior();
+        if (context.location === 'new_ticket_sidebar' && !autoAssignTickets) {
             const message = 'During a call please create new tickets via your softphone.';
             zafClient.invoke('notify', message, 'alert', { sticky: true });
             zafClient.invoke('popover', 'show');
@@ -118,7 +140,7 @@ const onInstanceRegistered = async (context) => {
 };
 
 const onTabSwitched = async (context) => {
-    console.log(logStamp('onTabSwitched'), context);
+    // console.log(logStamp('onTabSwitched'), context);
 
     // if new tab is a ticket then save the id for possible outbound dialing to unrecognised number
     session.currentTabTicket = context.tabType === 'ticket' ? context.itemId : null;

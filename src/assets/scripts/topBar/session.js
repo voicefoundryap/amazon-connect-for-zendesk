@@ -15,6 +15,7 @@ export default {
     appendedAttributes: {},
     isTransfer: false,
     isMonitoring: false,
+    callInProgress: false,
 
     clear: function() {
         this.contact = {};
@@ -39,5 +40,7 @@ export default {
         this.ticketInstance = null;
         this.contactDetailsAppended = false;
         this.appConfig.forEach((setting) => this.zafInfo.settings[setting.name] = setting.value || setting.default);
+        this.callInProgress = false;
+        localStorage.clear();
     }
 }

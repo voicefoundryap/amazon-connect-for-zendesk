@@ -12,14 +12,14 @@ const showAnalysis = (enable) => {
         client.invoke('resize', { width: '100%', height: '60vh' });
         client.invoke('show');
     } else {
-        console.log(logStamp('disabling the speech analysis pane'));
+        // console.log(logStamp('disabling the speech analysis pane'));
         client.invoke('hide');
     }
 }
 
 const client = ZAFClient.init();
 client.context().then((context) => {
-    console.log(logStamp("sideBar loaded, context: "), context);
+    // console.log(logStamp("sideBar loaded, context: "), context);
     showAnalysis(localStorage.getItem('vf.sidebar-enable') === 'true');
     tabType = context.location.split('_')[0];
     itemId = tabType === 'user' ? context.userId : context.ticketId;
@@ -30,7 +30,7 @@ client.context().then((context) => {
 });
 
 client.on('app.activated', async (context) => {
-    console.log(logStamp("app activated"), itemId);
+    // console.log(logStamp("app activated"), itemId);
     if (!topBarInstance)
         topBarInstance = await getTopBarInstance(client);
     if (topBarInstance && !context.firstLoad)
@@ -39,7 +39,7 @@ client.on('app.activated', async (context) => {
 });
 
 client.on('app.deactivated', async () => {
-    console.log(logStamp("app deactivated"), itemId);
+    // console.log(logStamp("app deactivated"), itemId);
     if (!topBarInstance)
         topBarInstance = await getTopBarInstance(client);
     if (topBarInstance)

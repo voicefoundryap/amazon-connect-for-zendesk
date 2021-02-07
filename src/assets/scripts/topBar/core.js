@@ -1,8 +1,14 @@
+import ui from './ui.js';
 import logStamp from '../util/log.js';
 import session from './session.js';
 import { zafClient } from './zafClient.js';
 
 export const resize = (size) => {
+    if (size === 'full')
+        ui.show('newTicketContainer');
+    else
+        ui.hide('newTicketContainer');
+
     zafClient.invoke('resize', {
         width: '360px',
         height: size === 'full' ? '610px' : '510px'

@@ -60,10 +60,11 @@ const updateTicketWithContactDetails = async (contact, ticketId) => {
     let direction;
     let htmlBody = '', plainBody = '';
 
+    outboundCli = appSettings.outboundCli;
+    inboundDialedNumber = appSettings.inboundDialedNumber || outboundCli;
+
     if (!session.contactDetailsAppended) {
 
-        outboundCli = appSettings.outboundCli;
-        inboundDialedNumber = appSettings.inboundDialedNumber || outboundCli;
         const agent = session.agent;
 
         const contactCallInfo = {
@@ -106,6 +107,7 @@ const updateTicketWithContactDetails = async (contact, ticketId) => {
     if (Object.keys(contactAttributesInfo).length) {
         htmlBody += (htmlBody ? '<br>' : '') + contactDetailsHtml(contactAttributesInfo, 'Amazon Connect Contact Attributes', false);
         plainBody += (plainBody ? '\r\n' : '') + contactDetailsPlain(contactAttributesInfo, 'Amazon Connect Contact Attributes', false);
+        localStorage.setItem('vf.storedAttributes', JSON.stringify(contactAttributesInfo));
     }
 
     if (htmlBody) {
