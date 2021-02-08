@@ -20,8 +20,13 @@ export const processInboundCall = async (contact) => {
     if (session.callInProgress) {
         ticketId = session.ticketId;
         user = session.user;
-    } else {
+        if (!autoAssignTickets && !ticketId) {
+            userId = localStorage.getItem('vf.viewingUserId');
+            user = userId ? await getFromZD(`users/${userId}.json`, 'user') : user;
+            ticketId = localStorage.getItem('vf.viewingTicketId');
+        }
 
+    } else {
         let ticket = {};
         ticketId = appSettings.zendeskTicket;   // in case existing ticket was passed via an attribute
 

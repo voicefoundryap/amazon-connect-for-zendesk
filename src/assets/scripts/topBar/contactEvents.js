@@ -107,8 +107,14 @@ const handleContactConnected = async () => {
                     await popTicket(session.zenAgentId, session.ticketId);
                     zafClient.invoke('popover', 'hide');
                 }
-            } else
+            } else if (!session.ticketId) {
+                const userId = localStorage.getItem('vf.viewingUserId');
+                const ticketId = localStorage.getItem('vf.viewingTicketId');
+                if (ticketId || userId)
+                    await newTicket.refreshUser(ticketId ? 'ticket' : 'user', ticketId || userId)
                 resize('full');
+            }
+    
         }
     }
 }
