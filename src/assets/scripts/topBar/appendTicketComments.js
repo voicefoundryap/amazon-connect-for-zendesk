@@ -1,6 +1,5 @@
 import logStamp from '../util/log.js';
 import session from './session.js';
-import updateTicket from './updateTicket.js';
 import { dialableNumber } from './phoneNumbers.js';
 import { zafClient } from './zafClient.js';
 
@@ -51,6 +50,20 @@ const traceUrl = (contactId) => {
         url += '/';
     url += `connect/contact-trace-records/details/${contactId}`;
     return url;
+}
+
+const updateTicket =  async (ticketId, changes) => {
+    const data = await zafClient.request({
+        url: `/api/v2/tickets/${ticketId}.json`,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            ticket: changes
+        })
+    }).catch((err) => { console.error(logStamp('Error while updating ticket'), err) });
+
+    if (data && data.ticket)
+        console.log(logStamp(`Updated ticket ${data.ticket.id} with: `), changes);
 }
 
 const updateTicketWithContactDetails = async (contact, ticketId) => {

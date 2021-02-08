@@ -32,6 +32,17 @@ export const popUser = async (agentId, userId) => {
     console.log(logStamp('user popped'), userId);
 }
 
+export const getFromZD = async (path, target, defaultValue = null) => {
+    const data = await zafClient.request({
+        url: `/api/v2/${path}`,
+        type: 'GET',
+        contentType: 'application/json',
+    }).catch((err) => { console.error(logStamp(`getting ${target} by ${path} from Zendesk API: `), err) });
+    const returnValue = data && data[target] ? data[target] : defaultValue;
+    console.log(logStamp(`returning ${target} value from obtained from Zendesk API query ${path}: `), returnValue);
+    return returnValue;
+}
+
 export const popTicket = async (agentId, ticketId) => {
     const data = await zafClient.request({
         url: `/api/v2/channels/voice/agents/${agentId}/tickets/${ticketId}/display.json`,
@@ -44,13 +55,9 @@ export const popTicket = async (agentId, ticketId) => {
 
 export const findTicket = async (query) => {
     console.log(logStamp('Searching for ticket by query: '), query);
-    const data = await zafClient.request({
-        url: `/api/v2/search.json?query=type%3Aticket+%22${query}%22`,
-        type: 'GET',
-        contentType: 'application/json',
-    }).catch((err) => { console.error(logStamp('findTicket'), err) });
-    if (data && data.results && data.results.length) {
-        const ticket = data.results[0];
+    const tickets = await getFromZD(`search.json?query=type%3Aticket+%22${query}%22`, 'results', []);
+    if (tickets.length) {
+        const ticket = tickets[0];
         console.log(logStamp('Found matching ticket: '), ticket);
         return ticket.id;
     }
@@ -67,13 +74,8 @@ const findUser = async (query, requester = null) => {
         query = query.substring(prefix.length);
 
     console.log(logStamp('Searching for user by query: '), query);
-    const data = await zafClient.request({
-        url: `/api/v2/search.json?query=role%3Aend-user%20phone%3A*${query}`,
-        type: 'GET',
-        contentType: 'application/json',
-    }).catch((err) => { console.error(logStamp('findUser'), err) });
-    if (data && data.results && data.results.length) {
-        const users = data.results;
+    const users = await getFromZD(`search.json?query=role%3Aend-user%20phone%3A*${query}`, 'results', []);
+    if (users.length) {
         console.log(logStamp('Found matching user(s): '), users);
         if (requester) {
             const foundAsReqester = users.find((user) => user.id === requester);
@@ -100,14 +102,9 @@ export const findMostRecentTicket = async (userId) => {
     const timeSpan = session.zafInfo.settings.createTicketAfterMinutes;
     // console.log(logStamp('time span in minutes: '), timeSpan);
     if (timeSpan == 0) return {};
-
-    const data = await zafClient.request({
-        url: `/api/v2/users/${userId}/tickets/requested.json?sort_by=updated_at&sort_order=desc`,
-        type: 'GET',
-        contentType: 'application/json',
-    }).catch((err) => { console.error(logStamp('findMostRecentTicket'), err); });
-    if (data && data.tickets && data.tickets.length) {
-        const openTickets = data.tickets.filter((ticket) => ticket.status !== 'closed');
+    const tickets = await getFromZD(`users/${userId}/tickets/requested.json?sort_by=updated_at&sort_order=desc`, 'tickets', []);
+    if (tickets.length) {
+        const openTickets = tickets.filter((ticket) => ticket.status !== 'closed');
         if (openTickets.length) {
             const ticket = openTickets[0];
             console.log(logStamp('Found most recent ticket'), ticket);
@@ -117,19 +114,9 @@ export const findMostRecentTicket = async (userId) => {
         } else
             console.log(logStamp(`User ${userId} doesn't have any active tickets`));
     } else
-        console.log(logStamp(`User ${userId} doesn't exist or has no tickets`), data);
+        console.log(logStamp(`User ${userId} doesn't exist or has no tickets`));
 
     return {};
-}
-
-export const getUserById = async (userId) => {
-    const data = await zafClient.request({
-        url: `/api/v2/users/${userId}.json`,
-        type: 'GET',
-        contentType: 'application/json'
-    }).catch(err => { console.error(logStamp('getUserById'), err); });
-    // console.log(logStamp('Returned response: '), data);
-    return data && data.user ? data.user : null;
 }
 
 export const resolveUser = async (contact, requester = null, dialOut = null) => {
@@ -140,7 +127,7 @@ export const resolveUser = async (contact, requester = null, dialOut = null) => 
             return null;
 
         console.log(logStamp('Searching for user by dialout'), dialOut.userId);
-        return getUserById(dialOut.userId);
+        return getFromZD(`users/${dialOut.userId}.json`, 'user');
     }
 
     const appSettings = session.zafInfo.settings;
@@ -148,7 +135,7 @@ export const resolveUser = async (contact, requester = null, dialOut = null) => 
     const userId = appSettings.zendeskUser;
     if (userId) {
         console.log(logStamp('Searching for user by id via attribute'), userId);
-        const user = await getUserById(userId);
+        const user = await getFromZD(`users/${userId}.json`, 'user');
         if (!user) {
             const message = `A user with the specified user id #${userId} was not found`;
             zafClient.invoke('notify', message, 'alert', { sticky: true });
@@ -173,13 +160,10 @@ export const resolveUser = async (contact, requester = null, dialOut = null) => 
 
 export const validateTicket = async (ticketId) => {
     console.log(logStamp('Searching for ticket by number: '), ticketId);
-    let data = await zafClient.request({
-        url: `/api/v2/tickets/${ticketId}.json`,
-        type: 'GET',
-        contentType: 'application/json'
-    }).catch((err) => { console.error(logStamp('validateTicket'), err); });
-    console.log(logStamp('got response: '), data);
-    if (data && data.ticket)
-        return { ticketId: data.ticket.id, requester: data.ticket.requester_id };
-    return {};
+    const ticket = await getFromZD(`tickets/${ticketId}.json`, 'ticket');
+    return ticket 
+        ? { 
+            ticketId: ticket.id, 
+            requester: ticket.requester_id }
+        : {}    
 }

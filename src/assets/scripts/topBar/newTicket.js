@@ -1,6 +1,7 @@
 import { zafClient } from './zafClient.js';
 import session from './session.js';
 import logStamp from '../util/log.js';
+import { getFromZD } from './core.js';
 import ui from './ui.js';
 
 const noRequester = '(New user will be created)';
@@ -40,6 +41,7 @@ export default {
     createUser,
 
     refreshUser: async (type, id) => {
+        console.log(logStamp(`refreshing user based on ${type}: ${id}`));
         ui.enable('attachToCurrentBtn', type === 'ticket');
         if (type === 'other') return;
 
@@ -52,25 +54,17 @@ export default {
             let userId = id;
             if (id) {
                 if (type === 'ticket') {
-                    const data = await zafClient.request({
-                        url: `/api/v2/tickets/${id}.json`,
-                        type: 'GET',
-                        contentType: 'application/json',
-                    }).catch((err) => { console.error(logStamp('refreshUser'), err); });
-                    if (!data) return;
+                    const ticket = await getFromZD(`tickets/${id}.json`, 'ticket');
+                    if (!ticket) return;
                     requesterKey = `t${id}`;
-                    userId = data.ticket.requester_id;
+                    userId = ticket.requester_id;
                 }
-                const data = await zafClient.request({
-                    url: `/api/v2/users/${userId}.json`,
-                    type: 'GET',
-                    contentType: 'application/json',
-                }).catch((err) => { console.error(logStamp('refreshUser'), err); });
-                if (!data) return;
+                const user = await getFromZD(`users/${userId}.json`, 'user');
+                if (!user) return;
                 requesterKey = requesterKey || `u${userId}`;
                 requester.id = id;
-                requester.user = data.user;
-                requester.name = data.user.name;
+                requester.user = user;
+                requester.name = user.name;
                 session.visitedTabs[requesterKey] = requester;
             }
         }

@@ -5,7 +5,7 @@ import appConfig from './appConfig.js';
 import appendTicketComments from './appendTicketComments.js';
 import newTicket from './newTicket.js';
 import ui from './ui.js';
-import { resize, determineAssignmentBehavior, popTicket, getUserById } from './core.js';
+import { resize, determineAssignmentBehavior, popTicket, getFromZD } from './core.js';
 import { processOutboundCall } from './outbound.js';
 import { processInboundCall } from './inbound.js';
 
@@ -47,7 +47,7 @@ const handleContactConnected = async () => {
         console.log(logStamp("Call in progress: "), { ticket: ticketId, user: userId });
         const message = 'Call in progress.\n Resuming...';
         zafClient.invoke('notify', message, 'notice');
-        if (userId) session.user = await getUserById(userId);
+        if (userId) session.user = await getFromZD(`users/${userId}.json`, 'user');
         if (ticketId) {
             session.ticketId = ticketId;
             session.ticketAssigned = true;

@@ -1,7 +1,7 @@
 import logStamp from '../util/log.js';
-import { zafClient } from './zafClient.js';
 import subscribeToContactEvents from './contactEvents.js';
 import subscribeToAgentEvents from './agentEvents.js';
+import { getFromZD } from './core.js';
 import ui from './ui.js'
 
 export default (appSettings, ccpContainerId) => {
@@ -9,12 +9,9 @@ export default (appSettings, ccpContainerId) => {
 
     ui.setText('instanceUrl', `https://${appSettings.subdomain}.zendesk.com`);
 
-    zafClient.request({
-        url: '/api/v2/apps/installations.json',
-        type: 'GET',
-        contentType: 'application/json'
-    }).then((data) => {
-        const apps = data.installations.filter((app) =>
+    getFromZD(`apps/installations.json`, 'installations', [])
+    .then((installations) => {
+        const apps = installations.filter((app) =>
             'vfApplicationName' in app.settings &&
             app.settings.vfApplicationName.toLowerCase() === 'aws connector').sort((a, b) => a.created_at < b.created_at ? 1 : -1);
         console.log(logStamp('Installations:\n'), apps);
@@ -22,7 +19,7 @@ export default (appSettings, ccpContainerId) => {
             ui.setText('appUrl', `https://${apps[0].app_id}.apps.zdusercontent.com`)
         else
             console.error(logStamp('App named "AWS Connector" not found'));
-    }).catch((err) => { console.error(logStamp('getting installed apps'), err) });
+    });
 
     const ccpParams = {
         ccpUrl: appSettings.connectInstanceUrl + "/connect/ccp-v2#",

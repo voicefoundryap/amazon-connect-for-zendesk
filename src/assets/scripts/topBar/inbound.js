@@ -4,7 +4,7 @@ import { zafClient } from './zafClient.js';
 import appendTicketComments from './appendTicketComments.js';
 import newTicket from './newTicket.js';
 import {
-    resize, determineAssignmentBehavior, popUser, popTicket, getUserById,
+    resize, determineAssignmentBehavior, popUser, popTicket, getFromZD,
     findTicket, findMostRecentTicket, resolveUser, validateTicket
 } from './core.js';
 
@@ -62,7 +62,7 @@ export const processInboundCall = async (contact) => {
 
         // then attempt to find the user
         user = ticket.fromTransfer
-            ? await getUserById(ticket.requester)
+            ? await getFromZD(`users/${ticket.requester}.json`, 'user')
             : await resolveUser(contact, ticket.requester);
     }
 
