@@ -58,8 +58,6 @@ const handleContactConnected = async () => {
         if (storedAttributes) session.appendedAttributes = JSON.parse(storedAttributes);
     }
 
-    session.callStarted = new Date();   //TODO: fix the date to match the date of CTR
-
     console.log(logStamp('handleContactConnected, pop before connected: '), appSettings.popBeforeCallConnected);
 
     // check real-time speech analysis support and config
@@ -260,6 +258,7 @@ export default (contact) => {
         logContactState(contact, 'handleContactConnected', 'Contact connected to agent');
         if (!session.state.connected) {
             session.state.connected = true;
+            session.callStarted = contact.toSnapshot().contactData.state.timestamp;
             handleContactConnected()
                 .then((result) => result)
                 .catch((err) => { console.error(logStamp('handleContactConnected'), err) });
