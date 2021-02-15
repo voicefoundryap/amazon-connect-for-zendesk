@@ -1,11 +1,17 @@
 
-const api = {
-    findTickets: async (contacts) => {
-        return [];
-    },
-    updatedTicket: async (ticketId, comment) => {
-        return true;
-    }
+const findTickets = async (contacts) => {
+    return [{
+        contactId: contacts[0],
+        ticketId: 1
+    }];
 };
 
-module.exports = api;
+const updateTicket = async (ticketId, comment) => {
+    return true;
+};
+
+
+module.exports = {
+    findTickets,
+    updateTicket
+};
