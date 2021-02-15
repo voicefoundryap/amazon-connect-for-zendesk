@@ -15,7 +15,7 @@ exports.handler = async (event, context) => {
         // then get the analysis object itself
         const { ContentType, contactId, analysis } = await s3.getAnalysis(s3key);
         if (ContentType !== 'application/json') return;
-        console.log('Analysis record: ', { ContentType, contactId, analysis });
+        // console.log('Analysis record: ', { ContentType, contactId, analysis });
 
         // check for explicit exclusion of this contact
         const excludeContact = analysis.Categories.MatchedCategories.includes(process.env.EXCLUSION_KEY);
@@ -23,6 +23,7 @@ exports.handler = async (event, context) => {
         if (excludeContact && !includeContact) return;
 
         // searching for corresponding Zendesk ticket
+        if (!api.init()) return;
         const [matchedTicket] = await api.findTickets([contactId]);
         if (matchedTicket) {
             console.log(`Found Zendesk ticket no. ${matchedTicket.ticketId}, updating`);
@@ -51,6 +52,7 @@ exports.handler = async (event, context) => {
         if (count === 0) return eventBridge.disableRule();
         
         // otherwise attempt to find matching tickets
+        if (!api.init()) return;
         const matchedTickets = await api.findTickets(retries);
         let processed = 0;
 
