@@ -14,11 +14,13 @@ const getAnalysis = async (key) => {
         console.error(message, err);
         return {};
     });
+    if (ContentType !== 'application/json') return {};
+    
     return {
         ContentType,
         contactId: Metadata['contact-id'],
         analysis: JSON.parse(Body.toString('utf-8'))
-    }
+    };
 };
 
 module.exports = {
