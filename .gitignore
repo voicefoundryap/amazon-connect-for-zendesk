@@ -106,3 +106,5 @@ dist
 # Local dev artifacts
 src/srcdev.zip
 src/ziplist.txt
+sandbox.html
+Contact Lens Sample.json
