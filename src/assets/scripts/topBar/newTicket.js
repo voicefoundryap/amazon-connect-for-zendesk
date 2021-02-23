@@ -58,7 +58,6 @@ export default {
                     if (!ticket) return;
                     requesterKey = `t${id}`;
                     userId = ticket.requester_id;
-                    localStorage.setItem('vf.viewingTicketId', id);
                 }
                 const user = await getFromZD(`users/${userId}.json`, 'user');
                 if (!user) return;
@@ -66,13 +65,16 @@ export default {
                 requester.user = user;
                 requester.name = user.name;
                 session.visitedTabs[requesterKey] = requester;
-                localStorage.setItem('vf.viewingUserId', userId);
             }
         }
         if (requester.user) {
             session.user = requester.user;
-            if (type === 'ticket')
+            localStorage.setItem('vf.viewingUserId', requester.user.id);
+            if (type === 'ticket') {
                 session.ticketId = id;
+                localStorage.setItem('vf.viewingTicketId', id);
+            } else 
+                localStorage.removeItem('vf.viewingTicketId');
         }
 
         setRequesterName(requester.name);

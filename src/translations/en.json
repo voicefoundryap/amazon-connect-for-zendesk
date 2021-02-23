@@ -7,14 +7,14 @@
     "parameters": {
       "connectInstanceUrl": {
         "label": "Amazon Connect URL",
-        "helpText": "Ask your administrator to provide you with the URL for your Amazon Connect instance."
-      },
-      "ssoSignInUrl": {
-        "label": "Single sign-on URL",
         "helpText": "Ask your administrator to provide you with the URL for your Amazon Connect instance (either https://<instance-name>.awsapps.com, or https://<instance-name>.my.connect.aws)."
       },
+      "ssoSignInUrl": {
+        "label": "Single sign-on URL (optional)",
+        "helpText": "If your Connect instance is configured with single sign-on (SSO) ask your administrator to provide you with the relevant URL to sign in. If you need to login manually leave this field blank."
+      },
       "zendeskTicket": {
-        "label": "Contact attribute name containing Zendesk Ticket Number",
+        "label": "Contact attribute name containing Zendesk Ticket Number (optional)",
         "helpText": "If an Amazon Connect contact attribute with this name is set in a contact flow then the specified Zendesk ticket will be opened."
       },
       "outboundCli": {
@@ -22,11 +22,11 @@
         "helpText": "The call centre number that will be reported in tickets as the number that the call was dialed from in outbound calls and the number that was called in inbound calls. For inbound calls it can be overridden by setting the `dialed_number` attribute in your contact flow."
       },
       "defaultCountryPrefix": {
-        "label": "Default country dialing prefix",
+        "label": "Default country dialing prefix (optional)",
         "helpText": "If specified, this prefix will be used in matching Zendesk users' telephone numbers that are in local format (without the prefix). Example: +61 for Australia."
       },
       "createTicketAfterMinutes": {
-        "label": "Create ticket after minutes",
+        "label": "Create ticket after minutes (optional)",
         "helpText": "This setting controls whether a recent ticket of a recognised caller should be opened instead of creating a new one. If there's no ticket updated within the specified time then new ticket will be created. It can be overridden by setting the `recent_ticket_timeout` attribute in your contact flow."
       },
       "medialess": {

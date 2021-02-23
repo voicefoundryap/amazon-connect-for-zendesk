@@ -8,6 +8,7 @@ import ui from './ui.js';
 import { resize, determineAssignmentBehavior, popTicket, getFromZD } from './core.js';
 import { processOutboundCall } from './outbound.js';
 import { processInboundCall } from './inbound.js';
+import setAWSCredentials from '../util/credentials.js';
 
 let appSettings = {};
 let speechAnalysis;
@@ -41,15 +42,42 @@ const handleContactConnected = async () => {
         await appConfig.applyAttributes(session);
     appSettings = session.zafInfo.settings;
 
+    // enabling pause/resume recording
+    if (appSettings.pauseRecording) {
+        const errorMessage = await setAWSCredentials(session.contact, appSettings);
+        if (!errorMessage) {
+            
+            // test Connect API - TODO: remove
+            // const connectAPI = new AWS.Connect({ apiVersion: '2017-08-08' });
+            // const params = {
+            //     ContactId: session.contact.getContactId(),
+            //     InitialContactId: session.contact.getInitialContactId(),
+            //     InstanceId: appSettings.connectInstanceId
+            // };
+            // await connectAPI.suspendContactRecording(params).promise().catch((err) => {
+            //     console.error(logStamp('error calling suspendContactRecording: '), err);
+            // });
+            
+            console.log(logStamp('pause/resume recording is enabled'));
+            // TODO: enable UI
+        } else {
+            const message = `${errorMessage}. Pause and resume recording feature will be disabled for this call`;
+            zafClient.invoke('notify', message, 'error', { sticky: true });
+        }
+    }
+
     if (session.callInProgress) {
-        const ticketId = localStorage.getItem('vf.currentTicketId');
-        const userId = localStorage.getItem('vf.currentUserId');
-        console.log(logStamp("Call in progress: "), { ticket: ticketId, user: userId });
-        const message = 'Call in progress.\n Resuming...';
+        const assignedTicketId = localStorage.getItem('vf.assignedTicketId');
+        const userId = localStorage.getItem('vf.viewingUserId');
+        console.log(logStamp("Call in progress: "), {
+            assignedTicket: assignedTicketId,
+            user: userId
+        });
+        const message = 'Call in progress. Resuming...';
         zafClient.invoke('notify', message, 'notice');
         if (userId) session.user = await getFromZD(`users/${userId}.json`, 'user');
-        if (ticketId) {
-            session.ticketId = ticketId;
+        if (assignedTicketId) {
+            session.ticketId = assignedTicketId;
             session.ticketAssigned = true;
             session.contactDetailsAppended = true;
         } else
@@ -100,21 +128,21 @@ const handleContactConnected = async () => {
                     session.ticketId = await newTicket.createTicket().catch((err) => null); //TODO: handle these errors
                 if (session.ticketId) {
                     // assign this ticket to call and attach contact details automatically
-                    if (!session.callInProgress) {
+                    if (!session.callInProgress)
                         await appendTicketComments.appendContactDetails(session.contact, session.ticketId);
-                        localStorage.setItem('vf.currentTicketId', session.ticketId);
-                    }
                     await popTicket(session.zenAgentId, session.ticketId);
                     zafClient.invoke('popover', 'hide');
                 }
-            } else if (!session.ticketId) {
-                const userId = localStorage.getItem('vf.viewingUserId');
-                const ticketId = localStorage.getItem('vf.viewingTicketId');
-                if (ticketId || userId)
-                    await newTicket.refreshUser(ticketId ? 'ticket' : 'user', ticketId || userId)
+            } else {
+                if (!session.ticketId) {
+                    const userId = localStorage.getItem('vf.viewingUserId');
+                    const ticketId = localStorage.getItem('vf.viewingTicketId');
+                    if (ticketId || userId)
+                        await newTicket.refreshUser(ticketId ? 'ticket' : 'user', ticketId || userId)
+                }
                 resize('full');
             }
-    
+
         }
     }
 }

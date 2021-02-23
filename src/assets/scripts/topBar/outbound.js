@@ -31,7 +31,7 @@ export const processOutboundCall = async (contact) => {
         console.log(logStamp('resolved user'), user);
         session.user = user;
         userId = user.id;
-        localStorage.setItem('vf.currentUserId', userId);
+        localStorage.setItem('vf.viewingUserId', userId);
 
         // for a new call determine the ticket from the dialout event
         ticketId = ticketId || (dialOut ? dialOut.ticketId : null);
@@ -40,7 +40,6 @@ export const processOutboundCall = async (contact) => {
             // currently open zendesk ticket was obtained from the dialOut event
             if (!session.callInProgress) {
                 await appendTicketComments.appendContactDetails(contact, ticketId);
-                localStorage.setItem('vf.currentTicketId', ticketId);
             }
         } else {
             if (autoAssignTickets) {
@@ -49,7 +48,6 @@ export const processOutboundCall = async (contact) => {
                 if (ticketId) {
                     await appendTicketComments.appendContactDetails(contact, ticketId);
                     await popTicket(session.zenAgentId, ticketId);
-                    localStorage.setItem('vf.currentTicketId', ticketId);
                     zafClient.invoke('popover', 'hide');
                 }
             } else {
@@ -73,7 +71,6 @@ export const processOutboundCall = async (contact) => {
         if (ticketInstances.length) {
             const ticketId = session.currentTabTicket;
             await appendTicketComments.appendContactDetails(contact, ticketId);
-            localStorage.setItem('vf.currentTicketId', ticketId);
             zafClient.invoke('popover', 'hide');
         }
     }

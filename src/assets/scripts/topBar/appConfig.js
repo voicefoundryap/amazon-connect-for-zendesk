@@ -112,6 +112,14 @@ const hardcoded = [
         valueCheck: true,
         default: null, //"transcript,comprehend,sentiment"
         attribute: "speech_analysis"
+    },
+    {
+        name: "pauseRecording",
+        label: "Enable pause and resume recording of the call",
+        description: "Displays pause/resume button to enable agent pause the call recording while obtaining sensitive data (eg. credit card details) from the customer.",
+        type: "checkbox",
+        default: false,
+        attribute: "pause_recording"
     }
 ];
 

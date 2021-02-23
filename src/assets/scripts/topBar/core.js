@@ -4,14 +4,15 @@ import session from './session.js';
 import { zafClient } from './zafClient.js';
 
 export const resize = (size) => {
-    if (size === 'full')
+    const expand = size === 'full' && !session.ticketAssigned;
+    if (expand)
         ui.show('newTicketContainer');
     else
         ui.hide('newTicketContainer');
 
     zafClient.invoke('resize', {
         width: '360px',
-        height: size === 'full' ? '610px' : '510px'
+        height: expand ? '610px' : '510px'
     });
 }
 
@@ -39,7 +40,7 @@ export const getFromZD = async (path, target, defaultValue = null) => {
         contentType: 'application/json',
     }).catch((err) => { console.error(logStamp(`getting ${target} by ${path} from Zendesk API: `), err) });
     const returnValue = data && data[target] ? data[target] : defaultValue;
-    console.log(logStamp(`returning ${target} value from obtained from Zendesk API query ${path}: `), returnValue);
+    console.log(logStamp(`returning ${target} value obtained from Zendesk API query [${path}]: `), returnValue);
     return returnValue;
 }
 
@@ -94,7 +95,7 @@ const findUser = async (query, requester = null) => {
             console.log(logStamp('Found existing user'), user.name);
         return user;
     }
-    console.log(logStamp(`User with query ${query} not found`), data);
+    console.log(logStamp(`User with query ${query} not found`), users);
     return null;
 }
 
