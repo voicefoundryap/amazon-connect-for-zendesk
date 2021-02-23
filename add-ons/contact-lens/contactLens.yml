@@ -33,8 +33,8 @@ Parameters:
     ConstraintDescription: "Endpoint must be a valid Zendesk Host URL. For example, https://voicefoundryap.zendesk.com"
   pConnectURL:
     Type: String
-    Description: Connect instance URL (either https://<connect-instance>.awsapps.com/connect, or https://<connect-instance>.my.connect.aws).
-    AllowedPattern: "https://[a-zA-Z0-9-.]+.(awsapps.com/connect|my.connect.aws)$"
+    Description: Connect instance URL (either https://<connect-instance>.awsapps.com, or https://<connect-instance>.my.connect.aws).
+    AllowedPattern: "https://[a-zA-Z0-9-.]+.(awsapps.com|my.connect.aws)$"
     ConstraintDescription: "Endpoint must be a valid Connect instance URL."
   pTimeZone:
     Type: String

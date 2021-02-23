@@ -11,7 +11,7 @@
       },
       "ssoSignInUrl": {
         "label": "Single sign-on URL",
-        "helpText": "If your Connect instance is configured with single sign-on (SSO) ask your administrator to provide you with the relevant URL to sign in. If you need to login manually leave this field blank."
+        "helpText": "Ask your administrator to provide you with the URL for your Amazon Connect instance (either https://<instance-name>.awsapps.com, or https://<instance-name>.my.connect.aws)."
       },
       "zendeskTicket": {
         "label": "Contact attribute name containing Zendesk Ticket Number",

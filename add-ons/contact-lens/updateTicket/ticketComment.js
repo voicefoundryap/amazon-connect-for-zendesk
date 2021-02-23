@@ -31,12 +31,15 @@ const buildOverallSentiment = (analysis, side) => {
         `<p>Positive: ${positiveRate}%</p><p>Negative: ${negativeRate}%</p><p>Neutral: ${neutralRate}%</p><p>Mixed: ${mixedRate}%</p>`;
 };
 
-const getCTRLink = (analysis, connectInstanceUrl) => {
+const getCTRLink = (analysis) => {
     const contactId = analysis.CustomerMetadata.ContactId;
-    let url = connectInstanceUrl;
-    if (!url.endsWith('/'))
-        url += '/';
-    url += `connect/contact-trace-records/details/${contactId}`;
+    let url = process.env.CONNECT_INSTANCE_URL;
+    if (!url)
+        return 'related contact trace record';
+        
+    if (url.endsWith('.awsapps.com'))
+        url += '/connect';
+    url += `/contact-trace-records/details/${contactId}`;
     if (process.env.TIME_ZONE)
         url += `?tz=${process.env.TIME_ZONE}`;
     return `<a href="${url}" rel="noreferer" target="_blank">contact trace record</a>`;
@@ -79,7 +82,7 @@ const buildTranscript = (analysis) => {
     }, '');
 };
 
-const buildComment = (analysis, connectInstanceUrl) => {
+const buildComment = (analysis) => {
     // time of call
     const contactIdNote = `<div><strong>Contact ID: </strong>${analysis.CustomerMetadata.ContactId}</div>`;
     // sectionCategories
@@ -93,7 +96,7 @@ const buildComment = (analysis, connectInstanceUrl) => {
         `<div style="float:left; width: 50%">${buildOverallSentiment(analysis, 'Agent')}</div>` + 
         `<div>${buildOverallSentiment(analysis, 'Customer')}</div>` + 
         `<div style="margin-top: 8px; font-style: italic;">For a more detailed sentiment analysis, ` +
-        `view the ${getCTRLink(analysis, connectInstanceUrl)}</div>`; 
+        `view the ${getCTRLink(analysis)}</div>`; 
     // talk times
     const sectionConversation = getTitle('Conversation characteristics') + 
         `<div style="margin-bottom: 10px;">${buildConversationCharacteristics(analysis)}</div>`;

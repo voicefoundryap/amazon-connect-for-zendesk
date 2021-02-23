@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
         if (response && response.length) {
             const [matchedTicket] = response;
             console.log(`Found Zendesk ticket no. ${matchedTicket.ticketId}, updating`);
-            const success = await api.updateTicket(matchedTicket, buildComment(analysis, process.env.CONNECT_INSTANCE_URL));
+            const success = await api.updateTicket(matchedTicket, buildComment(analysis));
             return success;
 
         } else {
@@ -65,7 +65,7 @@ exports.handler = async (event, context) => {
             if (s3key) {
                 const { analysis } = await s3.getAnalysis(s3key);
                 // console.log('Analysis: ', analysis);
-                const success = await api.updateTicket(ticket, buildComment(analysis, process.env.CONNECT_INSTANCE_URL));
+                const success = await api.updateTicket(ticket, buildComment(analysis));
                 if (success) {
                     // we can now delete it from retries
                     await dynamoDB.deleteRetry(ticket.contactId);

@@ -36,21 +36,20 @@ const contactDetailsPlain = (dict, title, noUnderscores = true) => {
     return details + '\n';
 }
 
-const recordingUrl = (contactId) => {
-    let url = `${session.zafInfo.settings.connectInstanceUrl}`;
+const getConnectUrl = () => {
+    let url = session.zafInfo.settings.connectInstanceUrl;
     if (!url.endsWith('/'))
         url += '/';
-    url += `connect/get-recording?format=wav&callLegId=${contactId}&zendesk_format=.wav`;
+    if (url.endsWith('.awsapps.com/'))
+        url += 'connect/';
     return url;
 }
 
-const traceUrl = (contactId) => {
-    let url = `${session.zafInfo.settings.connectInstanceUrl}`;
-    if (!url.endsWith('/'))
-        url += '/';
-    url += `connect/contact-trace-records/details/${contactId}`;
-    return url;
-}
+const recordingUrl = (contactId) => 
+    `${getConnectUrl()}get-recording?format=wav&callLegId=${contactId}&zendesk_format=.wav`;
+
+const traceUrl = (contactId) => 
+    `${getConnectUrl}contact-trace-records/details/${contactId}`;
 
 const updateTicket =  async (ticketId, changes) => {
     const data = await zafClient.request({
