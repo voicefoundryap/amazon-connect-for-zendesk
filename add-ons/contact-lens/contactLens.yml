@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+######################### Parameters ##########################
+Parameters:
+  pTargetEnvironment:
+    Description: Name of your target environment (dev, UAT, prod, ...)
+    Type: String
+    Default: prod
+  pConnectBucket:
+    Description: S3 bucket name for your Connect data storage
+    Type: String
+    Default: connect-xyz
+    AllowedPattern: '(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)'
+  pConnectMasterKeyId:
+    Description: Key ID of your KMS customer managed key with alias connect-master-key
+    Type: String
+  pRetrySchedule:
+    Description: Schedule for Zendesk ticket search retries (specified in UTC time zone)
+    Type: String
+    Default: "cron(0/5 7-19 ? * 1-5 *)"
+  pZendeskEmailID:
+    Type: String
+    Description:  The Zendesk Admin Email ID for the selected Zendesk Instance
+  pZendeskToken:
+    Type: String
+    Description: Zendesk Token with Admin privileges.This needs to be generated as a pre-requisite for this installation.
+    NoEcho: true
+  pZendeskURL:
+    Type: String
+    Description: Zendesk URL (https://<your-name>.zendesk.com).The Zendesk instance needs to be created as a pre-requisite for this installation.
+    AllowedPattern: "https://[a-zA-Z0-9-.]+.zendesk.com$"
+    ConstraintDescription: "Endpoint must be a valid Zendesk Host URL. For example, https://voicefoundryap.zendesk.com"
+  pConnectURL:
+    Type: String
+    Description: Connect instance URL (either https://<connect-instance>.awsapps.com/connect, or https://<connect-instance>.my.connect.aws).
+    AllowedPattern: "https://[a-zA-Z0-9-.]+.(awsapps.com/connect|my.connect.aws)$"
+    ConstraintDescription: "Endpoint must be a valid Connect instance URL."
+  pTimeZone:
+    Type: String
+    Description: "Time zone (eg. Australia/Sydney) to be used when linking to Connect Contact Trace Records. For a full list see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+  
+  
+######################### Setup Interface #######################
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Amazon Connect Configuration
+        Parameters:
+          - pConnectBucket
+          - pConnectMasterKeyId
+          - pConnectURL
+          - pTimeZone
+      - Label:
+          default: Zendesk Configuration
+        Parameters:
+          - pZendeskURL
+          - pZendeskToken
+          - pZendeskEmailID
+      - Label:
+          default: Deployment Parameters
+        Parameters:
+          - pTargetEnvironment
+          - pRetrySchedule
+    ParameterLabels:
+      pConnectBucket:
+        default: Connect Bucket Name
+      pConnectMasterKeyId:
+        default: Connect Master Key Id
+      pConnectURL:
+        default: Connect Instance URL
+      pZendeskURL:
+        default: Zendesk URL
+      pZendeskEmailID:
+        default: Zendesk Admin Email ID 
+      pZendeskToken:
+        default: Zendesk API Token
+      pTargetEnvironment:
+        default: Target Deployment Environment
+      pRetrySchedule:
+        default: Retry Schedule
+      pTimeZone:
+        default: CTR Time Zone
+
+Resources:
+
+  ######################### DynamoDB ##########################
+  tableZendeskRetries:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "zendeskUpdateRetries-${pTargetEnvironment}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: "contactId"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "contactId"
+          KeyType: "HASH"
+      TimeToLiveSpecification:
+        AttributeName:  "expires"
+        Enabled:  True
+
+  ######################### Lambda ##########################
+  functionUpdateTicket:
+    Type: AWS::Serverless::Function
+    DependsOn: tableZendeskRetries
+    Properties:
+      FunctionName: !Sub "contactLensZendeskUpdate-${pTargetEnvironment}"
+      Description: "Triggered on upload of Contact Lens analysis to S3 bucket, it finds and updates the matching Zendesk support ticket"
+      Runtime: nodejs12.x
+      Handler: index.handler
+      CodeUri: updateTicket/
+      Timeout: 240
+      Policies: 
+        - AWSLambdaBasicExecutionRole
+        - S3ReadPolicy:
+            BucketName: !Ref pConnectBucket
+        - KMSDecryptPolicy:
+            KeyId: pConnectMasterKeyId
+        - DynamoDBCrudPolicy:
+            TableName: !Ref tableZendeskRetries
+      Environment:
+        Variables:
+          CONTACT_LENS_BUCKET: !Ref pConnectBucket
+          CONNECT_INSTANCE_URL: !Ref pConnectURL
+          RETRIES_TABLE: !Ref tableZendeskRetries
+          EXCLUSION_KEY: "no-support-ticket"
+          INCLUSION_KEY: "support-ticket"
+          EXPIRES_MINUTES: 20
+          MAX_QUERY_LENGTH: 1024
+          TIME_ZONE: !Ref pTimeZone
+          ZD_EMAIL: !Ref pZendeskEmailID
+          ZD_TOKEN: !Ref pZendeskToken 
+          ZD_URL: !Ref pZendeskURL
+
+      Events:
+        updateTicketEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref pConnectBucket
+            Events: s3:ObjectCreated:*
+            Filter: 
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: Analysis/
+                  - Name: suffix
+                    Value: json
+        scheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref pRetrySchedule
+            Name: !Sub zendeskpRetrySchedule-${pTargetEnvironment}
+            Description: invokes contactLensZendeskUpdate lambda which retries finding a matching support ticket
