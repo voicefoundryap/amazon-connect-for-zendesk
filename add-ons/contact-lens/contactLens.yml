@@ -15,10 +15,6 @@ Parameters:
   pConnectMasterKeyId:
     Description: Key ID of your KMS customer managed key with alias connect-master-key
     Type: String
-  pRetrySchedule:
-    Description: Schedule for Zendesk ticket search retries (specified in UTC time zone)
-    Type: String
-    Default: "cron(0/5 7-19 ? * 1-5 *)"
   pZendeskEmailID:
     Type: String
     Description:  The Zendesk Admin Email ID for the selected Zendesk Instance
@@ -51,7 +47,6 @@ Metadata:
           - pConnectBucket
           - pConnectMasterKeyId
           - pConnectURL
-          - pTimeZone
       - Label:
           default: Zendesk Configuration
         Parameters:
@@ -62,7 +57,7 @@ Metadata:
           default: Deployment Parameters
         Parameters:
           - pTargetEnvironment
-          - pRetrySchedule
+          - pTimeZone
     ParameterLabels:
       pConnectBucket:
         default: Connect Bucket Name
@@ -78,8 +73,6 @@ Metadata:
         default: Zendesk API Token
       pTargetEnvironment:
         default: Target Deployment Environment
-      pRetrySchedule:
-        default: Retry Schedule
       pTimeZone:
         default: CTR Time Zone
 
@@ -150,6 +143,6 @@ Resources:
         scheduledEvent:
           Type: Schedule
           Properties:
-            Schedule: !Ref pRetrySchedule
+            Schedule: 'rate(5 minutes)'
             Name: !Sub zendeskpRetrySchedule-${pTargetEnvironment}
             Description: invokes contactLensZendeskUpdate lambda which retries finding a matching support ticket
