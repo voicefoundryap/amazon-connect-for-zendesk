@@ -21,8 +21,14 @@ export default (appSettings, ccpContainerId) => {
             console.error(logStamp('App named "AWS Connector" not found'));
     });
 
+    let connectUrl = appSettings.connectInstanceUrl;
+    if (!connectUrl.endsWith('/'))
+        connectUrl += '/';
+    if (connectUrl.endsWith('.awsapps.com/'))
+        connectUrl += 'connect/';
+
     const ccpParams = {
-        ccpUrl: appSettings.connectInstanceUrl + "/connect/ccp-v2#",
+        ccpUrl: connectUrl + "ccp-v2#",
         loginPopup: true, // TODO: display login popup within the app iframe, not as a new tab
         softphone: {
             allowFramedSoftphone: !appSettings.medialess

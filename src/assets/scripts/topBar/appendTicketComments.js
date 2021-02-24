@@ -48,8 +48,13 @@ const getConnectUrl = () => {
 const recordingUrl = (contactId) => 
     `${getConnectUrl()}get-recording?format=wav&callLegId=${contactId}&zendesk_format=.wav`;
 
-const traceUrl = (contactId) => 
-    `${getConnectUrl}contact-trace-records/details/${contactId}`;
+const traceUrl = (contactId) => {
+    let url = `${getConnectUrl()}contact-trace-records/details/${contactId}`;
+    let timeZone = session.zafInfo.settings.timeZone;
+    if (timeZone)
+        url += `?tz=${timeZone}`;
+    return url;
+}
 
 const updateTicket =  async (ticketId, changes) => {
     const data = await zafClient.request({

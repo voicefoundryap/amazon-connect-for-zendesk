@@ -7,14 +7,14 @@
     "parameters": {
       "connectInstanceUrl": {
         "label": "Amazon Connect URL",
-        "helpText": "Ask your administrator to provide you with the URL for your Amazon Connect instance (either https://<instance-name>.awsapps.com, or https://<instance-name>.my.connect.aws)."
+        "helpText": "Ask your administrator to provide you with the URL for your Amazon Connect instance (eg. either \n\nhttps://*instance-name*.awsapps.com, or \n\nhttps://*instance-name*.my.connect.aws)."
       },
       "ssoSignInUrl": {
         "label": "Single sign-on URL (optional)",
         "helpText": "If your Connect instance is configured with single sign-on (SSO) ask your administrator to provide you with the relevant URL to sign in. If you need to login manually leave this field blank."
       },
       "zendeskTicket": {
-        "label": "Contact attribute name containing Zendesk Ticket Number (optional)",
+        "label": "Contact attribute containing Zendesk Ticket Number (optional)",
         "helpText": "If an Amazon Connect contact attribute with this name is set in a contact flow then the specified Zendesk ticket will be opened."
       },
       "outboundCli": {
@@ -32,6 +32,10 @@
       "medialess": {
         "label": "Enable media-less mode",
         "helpText": "Select this option if you are using your Zendesk account in a VDI environment. You will first need to open the CCP in an independent window or tab before launching this app."
+      },
+      "timeZone": {
+        "label": "Connect time zone (optional)",
+        "helpText": "Enter time zone, eg. Australia/Sydney, so that the Contact Trace Records linked from within ticket comments will display in desired local date/time. If not specified it will default to UTC (Europe/London)."
       }
     }
   }
