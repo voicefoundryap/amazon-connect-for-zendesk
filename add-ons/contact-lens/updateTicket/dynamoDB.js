@@ -34,20 +34,6 @@ const getAllRetries = async () => {
     return { retries, count: results.Count };
 };
 
-const getRetriesCount = async () => {
-    const params = {
-        Select: 'COUNT',
-        TableName: process.env.RETRIES_TABLE
-    };
-    const result = await dynamoDB.scan(params).promise().catch((err) => {
-        const message = 'Error scanning DynamoDB for items count.';
-        console.error(message, err);
-        return null; // TODO: raise a cloudwatch alert
-    });
-    console.log('Count result: ', result);
-    return result.Count;
-};
-
 const addRetry = async ({ contactId, s3key }) => {
     const params = {
         Item: {
@@ -71,7 +57,7 @@ const deleteRetry = async (contactId) => {
         Key: { contactId: { S: contactId } },
         TableName: process.env.RETRIES_TABLE
     };
-    const result = await dynamoDB.deleteItem(params).promise().catch((err) => {
+    await dynamoDB.deleteItem(params).promise().catch((err) => {
         const message = `Error deleting record ${contactId} from DynamoDB.`;
         console.error(message, err);
         return false; // TODO: raise a cloudwatch alert
@@ -82,7 +68,6 @@ const deleteRetry = async (contactId) => {
 module.exports = {
     getRetryKey,
     getAllRetries,
-    getRetriesCount,
     addRetry,
     deleteRetry
 };

@@ -36,7 +36,7 @@ const getCTRLink = (analysis) => {
     let url = process.env.CONNECT_INSTANCE_URL;
     if (!url)
         return 'related contact trace record';
-        
+
     if (url.endsWith('.awsapps.com'))
         url += '/connect';
     url += `/contact-trace-records/details/${contactId}`;
@@ -86,8 +86,7 @@ const buildComment = (analysis) => {
     // time of call
     const contactIdNote = `<div><strong>Contact ID: </strong>${analysis.CustomerMetadata.ContactId}</div>`;
     // sectionCategories
-    const testCategories = ['CustomerWorried', 'CustomerHappy', 'Swearing', 'ProductA', 'ProductB', 'ProductC', 'AgentHelpful', 'LongCategoryNameHere']; 
-    const categories = [...analysis.Categories.MatchedCategories, ...testCategories]; // remove after testing
+    const categories = analysis.Categories.MatchedCategories;
     const sectionCategories = categories.length 
         ? getTitle('Categories') + `<div>${buildCategories(categories)}</div>`
         : '';
