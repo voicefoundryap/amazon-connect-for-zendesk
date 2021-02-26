@@ -1,80 +1,44 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Parameters:
-  pTargetEnvironment:
+  TargetEnvironment:
     Description: Name of your target environment (dev, UAT, prod, ...)
     Type: String
     Default: prod
-  pConnectBucket:
+  ConnectBucket:
     Description: S3 bucket name for your Connect data storage
     Type: String
     Default: connect-xyz
     AllowedPattern: (?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)
-  pConnectMasterKeyId:
+  ConnectMasterKeyId:
     Description: Key ID of your KMS customer managed key with alias connect-master-key
     Type: String
-  pZendeskEmailID:
+  ZendeskEmailID:
     Type: String
     Description: The Zendesk Admin Email ID for the selected Zendesk Instance
-  pZendeskToken:
+  ZendeskToken:
     Type: String
     Description: Zendesk Token with Admin privileges.This needs to be generated as
       a pre-requisite for this installation.
     NoEcho: true
-  pZendeskURL:
+  ZendeskURL:
     Type: String
     Description: Zendesk URL (https://<your-name>.zendesk.com).The Zendesk instance
       needs to be created as a pre-requisite for this installation.
     AllowedPattern: https://[a-zA-Z0-9-.]+.zendesk.com$
     ConstraintDescription: Endpoint must be a valid Zendesk Host URL. For example,
       https://voicefoundryap.zendesk.com
-  pConnectURL:
+  ConnectURL:
     Type: String
     Description: Connect instance URL (either https://<connect-instance>.awsapps.com,
       or https://<connect-instance>.my.connect.aws).
     AllowedPattern: https://[a-zA-Z0-9-.]+.(awsapps.com|my.connect.aws)$
     ConstraintDescription: Endpoint must be a valid Connect instance URL.
-  pTimeZone:
+  TimeZone:
     Type: String
     Description: Time zone (eg. Australia/Sydney) to be used when linking to Connect
       Contact Trace Records. For a full list see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 Metadata:
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-    - Label:
-        default: Amazon Connect Configuration
-      Parameters:
-      - pConnectBucket
-      - pConnectMasterKeyId
-      - pConnectURL
-    - Label:
-        default: Zendesk Configuration
-      Parameters:
-      - pZendeskURL
-      - pZendeskToken
-      - pZendeskEmailID
-    - Label:
-        default: Deployment Parameters
-      Parameters:
-      - pTargetEnvironment
-      - pTimeZone
-    ParameterLabels:
-      pConnectBucket:
-        default: Connect Bucket Name
-      pConnectMasterKeyId:
-        default: Connect Master Key Id
-      pConnectURL:
-        default: Connect Instance URL
-      pZendeskURL:
-        default: Zendesk URL
-      pZendeskEmailID:
-        default: Zendesk Admin Email ID
-      pZendeskToken:
-        default: Zendesk API Token
-      pTargetEnvironment:
-        default: Target Deployment Environment
-      pTimeZone:
-        default: CTR Time Zone
   AWS::ServerlessRepo::Application:
     Name: Contact-Lens-Analysis-for-Zendesk
     Description: Appends Amazon Contact Lens analysis to a corresponding Zendesk Support
@@ -90,14 +54,14 @@ Metadata:
     - Sentiment
     - Transcript
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/contact-lens
-    SemanticVersion: '0.0.4'
+    SemanticVersion: '0.0.5'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/contact-lens
 Resources:
   tableZendeskRetries:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: zendeskUpdateRetries-${pTargetEnvironment}
+        Fn::Sub: zendeskUpdateRetries-${TargetEnvironment}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
       - AttributeName: contactId
@@ -113,7 +77,7 @@ Resources:
     DependsOn: tableZendeskRetries
     Properties:
       FunctionName:
-        Fn::Sub: contactLensZendeskUpdate-${pTargetEnvironment}
+        Fn::Sub: contactLensZendeskUpdate-${TargetEnvironment}
       Description: Triggered on upload of Contact Lens analysis to S3 bucket, it finds
         and updates the matching Zendesk support ticket
       Runtime: nodejs12.x
@@ -124,19 +88,19 @@ Resources:
       - AWSLambdaBasicExecutionRole
       - S3ReadPolicy:
           BucketName:
-            Ref: pConnectBucket
+            Ref: ConnectBucket
       - KMSDecryptPolicy:
           KeyId:
-            Ref: pConnectMasterKeyId
+            Ref: ConnectMasterKeyId
       - DynamoDBCrudPolicy:
           TableName:
             Ref: tableZendeskRetries
       Environment:
         Variables:
           CONTACT_LENS_BUCKET:
-            Ref: pConnectBucket
+            Ref: ConnectBucket
           CONNECT_INSTANCE_URL:
-            Ref: pConnectURL
+            Ref: ConnectURL
           RETRIES_TABLE:
             Ref: tableZendeskRetries
           EXCLUSION_KEY: no-support-ticket
@@ -144,19 +108,19 @@ Resources:
           EXPIRES_MINUTES: 20
           MAX_QUERY_LENGTH: 1024
           TIME_ZONE:
-            Ref: pTimeZone
+            Ref: TimeZone
           ZD_EMAIL:
-            Ref: pZendeskEmailID
+            Ref: ZendeskEmailID
           ZD_TOKEN:
-            Ref: pZendeskToken
+            Ref: ZendeskToken
           ZD_URL:
-            Ref: pZendeskURL
+            Ref: ZendeskURL
       Events:
         scheduledEvent:
           Type: Schedule
           Properties:
             Schedule: rate(5 minutes)
             Name:
-              Fn::Sub: zendeskpRetrySchedule-${pTargetEnvironment}
+              Fn::Sub: zendeskRetrySchedule-${TargetEnvironment}
             Description: invokes contactLensZendeskUpdate lambda which retries finding
               a matching support ticket
