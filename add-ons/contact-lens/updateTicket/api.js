@@ -90,7 +90,7 @@ const findTickets = async (contacts) => {
 const updateTicket = async (ticket, comment) => {
     const webClient = init(ticket.agentEmail);
     if (!webClient) return null;
-    console.log(`Updating ticket ${ticket.ticketId} with comment: `, comment);
+    // console.log(`Updating ticket ${ticket.ticketId} with comment: `, comment);
     const updateUrl = `/api/v2/tickets/${ticket.ticketId}.json?async=true`;
     const response = await webClient.put(updateUrl, {
         ticket: {

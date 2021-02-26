@@ -37,7 +37,7 @@ Parameters:
     Description: "Time zone (eg. Australia/Sydney) to be used when linking to Connect Contact Trace Records. For a full list see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
   
   
-######################### Setup Interface #######################
+######################### Metadata ############################
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -75,6 +75,18 @@ Metadata:
         default: Target Deployment Environment
       pTimeZone:
         default: CTR Time Zone
+  
+  'AWS::ServerlessRepo::Application':
+    Name: Contact-Lens-Analysis-for-Zendesk
+    Description: Appends Amazon Contact Lens analysis to a corresponding Zendesk Support ticket. To be used with Amazon Connect app for Zendesk.
+    Author: VoiceFoundry-APAC
+    SpdxLicenseId: GPL-3.0-or-later
+    LicenseUrl: LICENSE
+    ReadmeUrl: README.md
+    Labels: ['Connnect','Contact-Lens', 'Zendesk', 'Sentiment', 'Transcript']
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/contact-lens
+    SemanticVersion: 0.0.4
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/contact-lens
 
 Resources:
 
@@ -110,7 +122,7 @@ Resources:
         - S3ReadPolicy:
             BucketName: !Ref pConnectBucket
         - KMSDecryptPolicy:
-            KeyId: pConnectMasterKeyId
+            KeyId: !Ref pConnectMasterKeyId
         - DynamoDBCrudPolicy:
             TableName: !Ref tableZendeskRetries
       Environment:
@@ -128,18 +140,6 @@ Resources:
           ZD_URL: !Ref pZendeskURL
 
       Events:
-        updateTicketEvent:
-          Type: S3
-          Properties:
-            Bucket: !Ref pConnectBucket
-            Events: s3:ObjectCreated:*
-            Filter: 
-              S3Key:
-                Rules:
-                  - Name: prefix
-                    Value: Analysis/
-                  - Name: suffix
-                    Value: json
         scheduledEvent:
           Type: Schedule
           Properties:

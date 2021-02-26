@@ -11,11 +11,9 @@ exports.handler = async (event, context) => {
     if (event.Records) {
         // Get the key of s3 object that triggered this function by being uploaded to the bucket
         const s3key = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, ' '));
-        if (!s3key.includes('Redacted/')) return;
         // then get the analysis object itself
-        const { ContentType, contactId, analysis } = await s3.getAnalysis(s3key);
-        if (ContentType !== 'application/json') return;
-        // console.log('Analysis record: ', { ContentType, contactId, analysis });
+        const { contactId, analysis } = await s3.getAnalysis(s3key);
+        // console.log('Analysis record: ', { contactId, analysis });
 
         // check for explicit exclusion of this contact
         const excludeContact = analysis.Categories.MatchedCategories.includes(process.env.EXCLUSION_KEY);
