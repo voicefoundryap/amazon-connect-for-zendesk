@@ -9,6 +9,7 @@ import { resize, determineAssignmentBehavior, popTicket, getFromZD } from './cor
 import { processOutboundCall } from './outbound.js';
 import { processInboundCall } from './inbound.js';
 import setAWSCredentials from '../util/credentials.js';
+import { displayCallControls } from './callControls.js';
 
 let appSettings = {};
 let speechAnalysis;
@@ -36,30 +37,20 @@ const handleContactConnecting = async () => {
 }
 
 const handleContactConnected = async () => {
+    console.log('🎨🎨🎨', appSettings)
+    console.log(appSettings)
     if (session.isMonitoring) return;
 
     if (session.contact.outboundConnection || session.callInProgress)
         await appConfig.applyAttributes(session);
     appSettings = session.zafInfo.settings;
-
+    
     // enabling pause/resume recording
     if (appSettings.pauseRecording) {
         const errorMessage = await setAWSCredentials(session.contact, appSettings);
         if (!errorMessage) {
-            
-            // test Connect API - TODO: remove
-            // const connectAPI = new AWS.Connect({ apiVersion: '2017-08-08' });
-            // const params = {
-            //     ContactId: session.contact.getContactId(),
-            //     InitialContactId: session.contact.getInitialContactId(),
-            //     InstanceId: appSettings.connectInstanceId
-            // };
-            // await connectAPI.suspendContactRecording(params).promise().catch((err) => {
-            //     console.error(logStamp('error calling suspendContactRecording: '), err);
-            // });
-            
+            displayCallControls({ isCurrentlyRecording: appSettings.pauseRecording });
             console.log(logStamp('pause/resume recording is enabled'));
-            // TODO: enable UI
         } else {
             const message = `${errorMessage}. Pause and resume recording feature will be disabled for this call`;
             zafClient.invoke('notify', message, 'error', { sticky: true });

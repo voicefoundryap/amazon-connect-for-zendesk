@@ -2,17 +2,27 @@ import ui from './ui.js';
 import logStamp from '../util/log.js';
 import session from './session.js';
 import { zafClient } from './zafClient.js';
+import { containerId as callControlsContainerId, resizeId as callControlsResizeId } from '../constants/callControls.js';
 
 export const resize = (size) => {
+    let height = 510;
     const expand = size === 'full' && !session.ticketAssigned;
-    if (expand)
+    
+    if (expand) {
         ui.show('newTicketContainer');
-    else
+        height+=100;
+    } else {
         ui.hide('newTicketContainer');
+    }
+
+    if(size === callControlsResizeId) {
+        ui.show(callControlsContainerId)
+        height+=100;
+    }
 
     zafClient.invoke('resize', {
         width: '360px',
-        height: expand ? '610px' : '510px'
+        height: `${height}px`,
     });
 }
 

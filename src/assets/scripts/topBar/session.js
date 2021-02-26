@@ -1,5 +1,4 @@
 export default {
-
     contact: {},
     agent: {},
     zafInfo: {},
@@ -16,6 +15,7 @@ export default {
     isTransfer: false,
     isMonitoring: false,
     callInProgress: false,
+    pauseRecording: false,
 
     clear: function() {
         this.contact = {};
@@ -41,6 +41,7 @@ export default {
         this.contactDetailsAppended = false;
         this.appConfig.forEach((setting) => this.zafInfo.settings[setting.name] = setting.value || setting.default);
         this.callInProgress = false;
+        this.pauseRecording = false;
         localStorage.clear();
     }
 }

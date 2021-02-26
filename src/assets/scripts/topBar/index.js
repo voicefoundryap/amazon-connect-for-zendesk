@@ -7,6 +7,8 @@ import { dialableNumber } from './phoneNumbers.js'
 import newTicket from './newTicket.js';
 import { resize, popTicket, determineAssignmentBehavior } from './core.js';
 import ui from './ui.js'
+import { buttons } from '../constants/callControls.js';
+import { displayCallControls } from './callControls.js';
 
 window.onload = (event) => {
     // first, establish the window (tab) id
@@ -50,6 +52,34 @@ window.onload = (event) => {
             zafClient.invoke('popover', 'hide');
         }
     });
+
+    ui.onClick(buttons.SUSPEND, async () => {
+        console.log(logStamp('Suspending call'), windowId);
+        const connectAPI = new AWS.Connect({ apiVersion: '2017-08-08' });
+        const params = {
+            ContactId: session.contact.getContactId(),
+            InitialContactId: session.contact.getInitialContactId(),
+            InstanceId: session.zafInfo.settings.connectInstanceId,
+        };
+        await connectAPI.suspendContactRecording(params).promise().catch((err) => {
+            console.error(logStamp('error calling suspendContactRecording: '), err);
+        });
+        displayCallControls({ isCurrentlyRecording: false });
+    })
+
+    ui.onClick(buttons.RESUME, async () => {
+        console.log(logStamp('Resuming call'), windowId);
+        const connectAPI = new AWS.Connect({ apiVersion: '2017-08-08' });
+        const params = {
+            ContactId: session.contact.getContactId(),
+            InitialContactId: session.contact.getInitialContactId(),
+            InstanceId: session.zafInfo.settings.connectInstanceId,
+        };
+        await connectAPI.resumeContactRecording(params).promise().catch((err) => {
+            console.error(logStamp('error calling suspendContactRecording: '), err);
+        });
+        displayCallControls({ isCurrentlyRecording: true });
+    })
 
     try {
         zafInit();
