@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const apiError = (url) => `
+const apiError = (queryUrl) => `
     error getting response from Zendesk Search API
     for query ${queryUrl}
 `;

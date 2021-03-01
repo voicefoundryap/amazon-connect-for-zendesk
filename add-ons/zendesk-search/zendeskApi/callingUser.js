@@ -10,11 +10,11 @@ const callingUser = async (event) => {
             return { status_code: httpStatus.notFound };
         }
         const { Parameters } = event.Details;
-        Parameters.search_template = `type:user role:end-user phone:${phoneNo}`
+        Parameters.search_template = `type:user role:end-user phone:${phoneNo}`;
         return searchByTemplate(event);
     }
 
     return { status_code: httpStatus.notFound };
-}
+};
 
 module.exports = callingUser;

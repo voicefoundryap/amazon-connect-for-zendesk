@@ -13,18 +13,18 @@ const commonUserFields = (user) => {
         time_zone: user.iana_time_zone,
         organization: user.organization_id,
         suspended: user.suspended
-    }
+    };
 };
 
 const commonTicketFields = (ticket) => {
     return {
-        zendesk_ticket = ticket.id,
-        zendesk_user = ticket.requester,
-        ticket_subject = ticket.subject,
-        ticket_status = ticket.status,
-        ticket_brand = ticket.brand_id
-    }
-}
+        zendesk_ticket: ticket.id,
+        zendesk_user: ticket.requester,
+        ticket_subject: ticket.subject,
+        ticket_status: ticket.status,
+        ticket_brand: ticket.brand_id
+    };
+};
 
 module.exports = {
     commonUserFields,

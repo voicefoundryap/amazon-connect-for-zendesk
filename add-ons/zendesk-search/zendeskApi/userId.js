@@ -4,7 +4,7 @@ const { commonUserFields } = require('./commonFields');
 
 const userId = async (event) => {
     const { Parameters } = event.Details;
-    if (!Parameters.zendesk_user) return { status_code: httpStatus.badRequest }
+    if (!Parameters.zendesk_user) return { status_code: httpStatus.badRequest };
 
     const webClient = init();
     if (!webClient) return { status_code: httpStatus.serverError };
@@ -17,7 +17,7 @@ const userId = async (event) => {
     return {
         status_code: httpStatus.ok,
         ...commonUserFields(user)
-    }
-}
+    };
+};
 
 module.exports = userId; 

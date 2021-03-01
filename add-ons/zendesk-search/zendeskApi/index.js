@@ -35,11 +35,19 @@ exports.handler = async (event, context) => {
             response = await callingUser(event);
             if (response.status_code === httpStatus.ok) {
                 Parameters.zendesk_user = response.zendesk_user;
-                response = { 
-                    ...await recentTicket(event),
-                    ...response,
-                    open_tickets: response.count
-                };
+                const recentTickets = await recentTicket(event);
+                if (recentTickets.status_code === httpStatus.ok) {
+                    response = {
+                        ...response,
+                        ...recentTickets,
+                        open_tickets: recentTickets.results_count
+                    };
+                } else {
+                    response = {
+                        ...response,
+                        open_tickets: 0
+                    };
+                }
             }
             break;
         case 'calling_user':

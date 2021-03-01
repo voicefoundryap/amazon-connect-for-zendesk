@@ -4,7 +4,7 @@ const { commonTicketFields } = require('./commonFields');
 
 const ticketId = async (event) => {
     const { Parameters } = event.Details;
-    if (!Parameters.zendesk_ticket) return { status_code: httpStatus.badRequest }
+    if (!Parameters.zendesk_ticket) return { status_code: httpStatus.badRequest };
 
     const webClient = init();
     if (!webClient) return { status_code: httpStatus.serverError };
@@ -18,6 +18,6 @@ const ticketId = async (event) => {
         status_code: httpStatus.ok,
         ...commonTicketFields(ticket)
     };
-}
+};
 
 module.exports = ticketId; 
