@@ -6,6 +6,7 @@ const recentTicket = require('./recentTicket');
 const userId = require('./userId');
 const ticketId = require('./ticketId');
 const template = require('./template');
+const customField = require('./customField');
 
 exports.handler = async (event, context) => {
     // console.log('Received event:', JSON.stringify(event, null, 2));
@@ -57,8 +58,7 @@ exports.handler = async (event, context) => {
             response = await recentTicket(event);
             break;
         case 'custom_fields':
-            // TODO:
-            // response = await customFields(event);
+            response = await customField(event);
             break;
         case 'template':
             response = await template(event);
