@@ -4,12 +4,12 @@ Transform: AWS::Serverless-2016-10-31
 ######################### Parameters ##########################
 Parameters:
   TargetEnvironment:
-    Description: Name of your target environment (dev, UAT, prod, ...)
+    Description: Name of your target environment which will be used as a suffix on created resources (dev, UAT, prod, ...)
     Type: String
     Default: prod
   ZendeskEmailID:
     Type: String
-    Description:  Email address of an active Zendesk Agent for the selected Zendesk Instance
+    Description:  Verified email address of a Zendesk agent or admin for the selected Zendesk Instance
   ZendeskToken:
     Type: String
     Description: Zendesk Token for API access. This needs to be generated as a pre-requisite for this installation.
@@ -19,7 +19,7 @@ Parameters:
     Description: Zendesk URL (https://<your-name>.zendesk.com).The Zendesk instance needs to be created as a pre-requisite for this installation.
     AllowedPattern: "https://[a-zA-Z0-9-.]+.zendesk.com$"
     ConstraintDescription: "Endpoint must be a valid Zendesk Host URL. For example, https://voicefoundryap.zendesk.com"
-  RecentTicketHours:
+  RecentTicketsHours:
     Type: Number
     Description: Time span (in hours) within which to search for recently updated open tickets (defaults to 72 if not specified here)
 
@@ -35,7 +35,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['Connnect','search', 'Zendesk', 'Support-ticket', 'Contact-flow']
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
-    SemanticVersion: 0.0.2
+    SemanticVersion: 0.0.3
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
 
 Resources:
@@ -57,4 +57,4 @@ Resources:
           ZD_EMAIL: !Ref ZendeskEmailID
           ZD_TOKEN: !Ref ZendeskToken 
           ZD_URL: !Ref ZendeskURL
-          RECENT_TICKET_HOURS: !Ref RecentTicketHours
+          RECENT_TICKETS_HOURS: !Ref RecentTicketsHours

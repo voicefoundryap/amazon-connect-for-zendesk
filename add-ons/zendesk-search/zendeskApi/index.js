@@ -26,10 +26,10 @@ exports.handler = async (event, context) => {
 
     let response;
     switch (searchBy) {
-        case 'user_id':
+        case 'zendesk_user':
             response = await userId(event);
             break;
-        case 'ticket_id':
+        case 'zendesk_ticket':
             response = await ticketId(event);
             break;
         case 'find_calling_user':   // this search type is deprecated, will be removed in v2.3
@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
         case 'most_recent_ticket':
             response = await recentTicket(event);
             break;
-        case 'custom_fields':
+        case 'custom_field':
             response = await customField(event);
             break;
         case 'template':

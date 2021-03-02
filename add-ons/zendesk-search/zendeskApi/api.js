@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { httpStatus } = require('./constants');
 
 const apiError = (queryUrl) => `
     error getting response from Zendesk Search API
@@ -35,17 +36,22 @@ const init = (email) => {
 const getApiResponse = async (webClient, queryUrl) => {
     return webClient.get(queryUrl).catch((err) => {
         console.error(apiError(queryUrl), err);
-        return null;
+        if (err.response) {
+            // client received an error response (5xx, 4xx)
+            return err.response.status;
+        } else if (err.request) {
+            // client never received a response, or request never left
+            return null;
+        } else {
+            return null;
+        }
     });
 };
 
 const searchZendesk = async (webClient, queryUrl) => {
     const response = await getApiResponse(webClient, queryUrl);
-    if (!(response && response.data)) {
-        console.error(apiError(queryUrl), response);
-        return {};
-    }
-    
+    if (!(response && response.data)) return {};
+
     const { data } = response;
     if (!data.results) {
         console.error('Unexpected response from Zendesk API: ', data);
@@ -61,8 +67,7 @@ const searchZendesk = async (webClient, queryUrl) => {
 const queryZendesk = async (webClient, queryUrl, expected) => {
     const response = await getApiResponse(webClient, queryUrl);
     if (!(response && response.data)) {
-        console.error(apiError(queryUrl), response);
-        return undefined;
+        return response === httpStatus.notFound ? response : null;
     }
 
     const { data } = response;

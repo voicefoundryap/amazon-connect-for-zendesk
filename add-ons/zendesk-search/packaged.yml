@@ -2,13 +2,14 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Parameters:
   TargetEnvironment:
-    Description: Name of your target environment (dev, UAT, prod, ...)
+    Description: Name of your target environment which will be used as a suffix on
+      created resources (dev, UAT, prod, ...)
     Type: String
     Default: prod
   ZendeskEmailID:
     Type: String
-    Description: Email address of an active Zendesk Agent for the selected Zendesk
-      Instance
+    Description: Verified email address of a Zendesk agent or admin for the selected
+      Zendesk Instance
   ZendeskToken:
     Type: String
     Description: Zendesk Token for API access. This needs to be generated as a pre-requisite
@@ -21,7 +22,7 @@ Parameters:
     AllowedPattern: https://[a-zA-Z0-9-.]+.zendesk.com$
     ConstraintDescription: Endpoint must be a valid Zendesk Host URL. For example,
       https://voicefoundryap.zendesk.com
-  RecentTicketHours:
+  RecentTicketsHours:
     Type: Number
     Description: Time span (in hours) within which to search for recently updated
       open tickets (defaults to 72 if not specified here)
@@ -41,7 +42,7 @@ Metadata:
     - Support-ticket
     - Contact-flow
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
-    SemanticVersion: '0.0.2'
+    SemanticVersion: '0.0.3'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
 Resources:
   functionZendeskSearch:
@@ -53,7 +54,7 @@ Resources:
         API for tickets and users
       Runtime: nodejs12.x
       Handler: index.handler
-      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/9bf0aa5d3869bd80844cbc4c5d9226f4
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/8990aced688880da6241883bec97b38a
       Timeout: 8
       Policies:
       - AWSLambdaBasicExecutionRole
@@ -65,5 +66,5 @@ Resources:
             Ref: ZendeskToken
           ZD_URL:
             Ref: ZendeskURL
-          RECENT_TICKET_HOURS:
-            Ref: RecentTicketHours
+          RECENT_TICKETS_HOURS:
+            Ref: RecentTicketsHours

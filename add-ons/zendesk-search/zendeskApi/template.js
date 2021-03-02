@@ -1,6 +1,6 @@
 const { init, searchZendesk } = require('./api');
 const { httpStatus, keywordParams } = require('./constants');
-const { commonUserFields, commonTicketFields } = require('./commonFields');
+const { commonUserFields, commonTicketFields, copiedFields } = require('./returningFields');
 
 const template = async (event) => {
     const { Parameters } = event.Details;
@@ -25,7 +25,12 @@ const template = async (event) => {
 
     const { results, count } = await searchZendesk(webClient, query);
     if (!results) return { status_code: httpStatus.serverError };
-    if (!results.length) return { status_code: httpStatus.notFound };
+    if (!results.length) {
+        return { 
+            status_code: httpStatus.notFound,
+            ...copiedFields(Parameters.carry_on, Parameters)
+        };
+    }
     let result = results[0];
 
     // hack to return the primary user for a given phone number
@@ -34,18 +39,17 @@ const template = async (event) => {
         result = results.find((user) => !user.shared_phone_number);
     }
 
-    const response = { status_code: httpStatus.ok, results_count: count };
-    if (Parameters.return_fields) {
-        const returnFields = Parameters.return_fields.split(',').map((field) => field.trim());
-        returnFields.forEach((field) => {
-            response[field] = result[field];
-        });
-    }
-
+    const response = { 
+        status_code: httpStatus.ok, 
+        results_count: count,
+        ...copiedFields(Parameters.return_fields, result),
+        ...copiedFields(Parameters.carry_on, Parameters)
+    };
+    
     if (searchString.startsWith('type:ticket')) {
         return { 
             ...response,
-            ...commonTicketFields(result) 
+            ...commonTicketFields(result)
         };
     }
 

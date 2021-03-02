@@ -1,6 +1,6 @@
 const { init, queryZendesk } = require('./api');
 const { httpStatus, returnType } = require('./constants');
-const { commonUserFields } = require('./commonFields');
+const { commonUserFields, copiedFields } = require('./returningFields');
 
 const userId = async (event) => {
     const { Parameters } = event.Details;
@@ -11,13 +11,19 @@ const userId = async (event) => {
 
     const query = `/api/v2/users/${Parameters.zendesk_user}.json`;
     const user = await queryZendesk(webClient, query, returnType.user);
-    if (user === undefined) return { status_code: httpStatus.serverError };
-    if (user === null) return { status_code: httpStatus.notFound };
+    if (!user) return { status_code: httpStatus.serverError };
+    if (user === httpStatus.notFound) {
+        return {
+            status_code: httpStatus.notFound,
+            ...copiedFields(Parameters.cary_on, Parameters)
+        };
+    }
 
     return {
         status_code: httpStatus.ok,
-        ...commonUserFields(user)
+        ...commonUserFields(user),
+        ...copiedFields(Parameters.cary_on, Parameters)
     };
 };
 
-module.exports = userId; 
+module.exports = userId;

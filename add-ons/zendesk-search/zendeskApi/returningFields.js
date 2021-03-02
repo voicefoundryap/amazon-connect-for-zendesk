@@ -26,7 +26,19 @@ const commonTicketFields = (ticket) => {
     };
 };
 
+const copiedFields = (fieldList, source) => {
+    const target = {};
+    if (fieldList) {
+        const fieldArray = fieldList.split(',').map((field) => field.trim());
+        fieldArray.forEach((field) => {
+            target[field] = source[field];
+        })
+    };
+    return target; 
+}
+
 module.exports = {
     commonUserFields,
-    commonTicketFields
+    commonTicketFields,
+    copiedFields
 };

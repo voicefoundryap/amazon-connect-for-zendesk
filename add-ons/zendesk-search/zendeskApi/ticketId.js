@@ -1,6 +1,6 @@
 const { init, queryZendesk } = require('./api');
 const { httpStatus, returnType } = require('./constants');
-const { commonTicketFields } = require('./commonFields');
+const { commonTicketFields, copiedFields } = require('./returningFields');
 
 const ticketId = async (event) => {
     const { Parameters } = event.Details;
@@ -11,13 +11,19 @@ const ticketId = async (event) => {
 
     const query = `/api/v2/tickets/${Parameters.zendesk_ticket}.json`;
     const ticket = await queryZendesk(webClient, query, returnType.ticket);
-    if (ticket === undefined) return { status_code: httpStatus.serverError };
-    if (ticket === null) return { status_code: httpStatus.notFound };
+    if (!ticket) return { status_code: httpStatus.serverError };
+    if (ticket === httpStatus.notFound) {
+        return { 
+            status_code: httpStatus.notFound,
+            ...copiedFields(Parameters.cary_on, Parameters)
+        };
+    }
     
     return {
         status_code: httpStatus.ok,
-        ...commonTicketFields(ticket)
+        ...commonTicketFields(ticket),
+        ...copiedFields(Parameters.cary_on, Parameters)
     };
 };
 
-module.exports = ticketId; 
+module.exports = ticketId;
