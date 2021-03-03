@@ -35,12 +35,15 @@ const init = (email) => {
 
 const getApiResponse = async (webClient, queryUrl) => {
     return webClient.get(queryUrl).catch((err) => {
-        console.error(apiError(queryUrl), err);
+        console.error(apiError(queryUrl));
         if (err.response) {
             // client received an error response (5xx, 4xx)
+            console.error(`💥💥💥💥 response status: ${err.response.status}`);
+            console.error(err.response.data);
+            console.error(err.response.headers);
             return err.response.status;
         } else if (err.request) {
-            // client never received a response, or request never left
+            console.error(`💥💥💥💥 ${err.request}`);
             return null;
         } else {
             return null;
