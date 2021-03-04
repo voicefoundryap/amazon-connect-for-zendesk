@@ -16,7 +16,7 @@ export const resize = (size) => {
     }
 
     if(size === callControlsResizeId) {
-        ui.show(callControlsContainerId)
+        ui.show(callControlsContainerId, 'flex')
         height+=100;
     }
 
