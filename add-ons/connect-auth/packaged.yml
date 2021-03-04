@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  TargetEnvironment:
+    Description: Name of your target environment which will be used as a suffix on
+      created resources (dev, UAT, prod, ...)
+    Type: String
+    Default: prod
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: Zendesk-Connect-authorization
+    Description: Enables Amazon Connect app for Zendesk to access Connect API. Required
+      for certain functionality like pause/resume recording.
+    Author: VoiceFoundry-APAC
+    SpdxLicenseId: GPL-3.0-or-later
+    LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/connect-auth/e62637ea8a114355b985fd86c9ffbd6e
+    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/connect-auth/feedaa64aeb0e4a70bb5ceef681f99e7
+    Labels:
+    - Connnect
+    - Zendesk
+    - Pause-Resume
+    - Recording
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
+    SemanticVersion: '0.0.2'
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
+Resources:
+  policyConnectAll:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Sub: connect-all-${TargetEnvironment}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          Effect: Allow
+          Action:
+          - connect:*
+          Resource: '*'
+  roleAccountAssumeConnect:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: account-assume-connect-${TargetEnvironment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS:
+            - Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+          Action:
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+      - Ref: policyConnectAll
+  policyLambdaAssumeRole:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Sub: lambda-assume-role-${TargetEnvironment}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - sts:AssumeRole
+          Resource:
+            Fn::Sub: ${roleAccountAssumeConnect.Arn}
+  functionContactInit:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: zendeskContactInit-${TargetEnvironment}
+      Description: Triggered from contact flow, it retrieves temporary credentials
+        for Zendesk to access Connect API
+      Runtime: nodejs12.x
+      Handler: index.handler
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/connect-auth/eb20ee582c2f10dcb407e8da9b4e08b1
+      Timeout: 8
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - Ref: policyLambdaAssumeRole
+      Environment:
+        Variables:
+          ASSUME_ROLE:
+            Fn::Sub: ${roleAccountAssumeConnect.Arn}
