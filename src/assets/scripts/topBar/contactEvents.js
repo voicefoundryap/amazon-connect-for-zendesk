@@ -167,7 +167,7 @@ const handleContactEnded = async () => {
         await appendTicketComments.appendTheRest(session.contact, session.ticketId);
         if (appSettings.speechAnalysisEnabled)
             speechAnalysis.updateTicketAttribute(session.ticketId.toString());
-    } else if (appSettings.forceTicketCreation && !(session.isMonitoring) && !unassignedOutboundCall) {
+    } else if (appSettings.forceTicketCreation && !session.isMonitoring && !unassignedOutboundCall) {
         // manual assignment mode, the agent has forgotten to assign - force ticket creation (if configured)
         // set the agent as a requester
         session.user = { name: session.contact.customerNo, id: null }
