@@ -1,4 +1,4 @@
-import { buttons, containerId, resizeId } from "../constants/callControls.js"
+import { buttons, resizeId } from "../constants/callControls.js"
 import { resize } from "./core.js";
 import ui from './ui.js';
 
