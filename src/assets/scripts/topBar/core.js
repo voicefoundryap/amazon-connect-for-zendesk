@@ -10,12 +10,20 @@ export const resize = (size) => {
     
     if (expand) {
         ui.show('newTicketContainer');
+        const callControlsElement = document.getElementById(callControlsContainerId);
+        if(callControlsElement && callControlsElement.style.display !== 'none'){
+            height+=100;
+        }
         height+=100;
     } else {
         ui.hide('newTicketContainer');
     }
 
     if(size === callControlsResizeId) {
+        const newTicketContainer = document.getElementById('newTicketContainer');
+        if(newTicketContainer && newTicketContainer.style.display !== 'none'){
+            height+=100;
+        }
         ui.show(callControlsContainerId, 'flex')
         height+=100;
     }
