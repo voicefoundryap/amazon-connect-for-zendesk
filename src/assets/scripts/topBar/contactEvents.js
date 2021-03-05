@@ -178,7 +178,7 @@ const handleContactEnded = async () => {
         }
     }
 
-    resize('down');
+    resize('contactEnded');
     newTicket.setRequesterName(null);
     ui.enable('attachToCurrentBtn', false);
     zafClient.invoke('popover', 'show');
