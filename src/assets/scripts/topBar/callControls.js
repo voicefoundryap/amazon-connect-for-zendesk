@@ -4,7 +4,6 @@ import ui from './ui.js';
 
 export const displayCallControls = ({ isCurrentlyRecording }) => {
     resize(resizeId);
-    ui.show(containerId, 'flex')
     if(isCurrentlyRecording) {
         ui.show(buttons.SUSPEND);
         ui.hide(buttons.RESUME);

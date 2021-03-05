@@ -37,8 +37,6 @@ const handleContactConnecting = async () => {
 }
 
 const handleContactConnected = async () => {
-    console.log('🎨🎨🎨', appSettings)
-    console.log(appSettings)
     if (session.isMonitoring) return;
 
     if (session.contact.outboundConnection || session.callInProgress)
