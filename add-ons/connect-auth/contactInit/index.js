@@ -9,7 +9,7 @@ exports.handler = async (event, context) => {
 
     const sts = new AWS.STS();
     const params = {
-        DurationSeconds: 900,
+        DurationSeconds: Number(process.env.SESSION_EXPIRY) || 3600,
         ExternalId: "AWS_Connector_for_Zendesk",
         RoleArn: process.env.ASSUME_ROLE,
         RoleSessionName: event.Details.ContactData.ContactId
