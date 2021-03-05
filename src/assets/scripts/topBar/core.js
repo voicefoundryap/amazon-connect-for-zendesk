@@ -16,14 +16,14 @@ export const resize = (size) => {
             ui.hide('newTicketContainer');
         }
         const callControlsElement = document.getElementById(callControlsContainerId);
-        if(callControlsElement && callControlsElement.style.display !== 'none'){
+        if(callControlsElement && callControlsElement.style.display === 'flex'){
             height+=70;
         }       
     }
     
     if(size === callControlsResizeId) {
         const newTicketContainer = document.getElementById('newTicketContainer');
-        if(newTicketContainer && newTicketContainer.style.display !== 'none'){
+        if(newTicketContainer && newTicketContainer.style.display === 'block'){
             height+=80;
         }
         ui.show(callControlsContainerId, 'flex')
