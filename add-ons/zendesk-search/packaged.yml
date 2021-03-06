@@ -42,7 +42,7 @@ Metadata:
     - Support-ticket
     - Contact-flow
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
-    SemanticVersion: '0.0.4'
+    SemanticVersion: '0.0.5'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
 Resources:
   functionZendeskSearch:
@@ -54,7 +54,7 @@ Resources:
         API for tickets and users
       Runtime: nodejs12.x
       Handler: index.handler
-      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/74c8552755bb8df0a615ea1d271c5c2a
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/2866403ea519f2a2656a8f74e62d679b
       Timeout: 8
       Policies:
       - AWSLambdaBasicExecutionRole

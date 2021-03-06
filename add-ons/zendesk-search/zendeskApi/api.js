@@ -70,7 +70,7 @@ const searchZendesk = async (webClient, queryUrl) => {
 const queryZendesk = async (webClient, queryUrl, expected) => {
     const response = await getApiResponse(webClient, queryUrl);
     if (!(response && response.data)) {
-        return response === httpStatus.notFound ? response : null;
+        return response == '404' ? httpStatus.notFound : null;
     }
 
     const { data } = response;
