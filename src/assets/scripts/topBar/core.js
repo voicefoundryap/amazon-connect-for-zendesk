@@ -7,17 +7,33 @@ import { containerId as callControlsContainerId, resizeId as callControlsResizeI
 export const resize = (size) => {
     let height = 510;
     const expand = size === 'full' && !session.ticketAssigned;
+
+    if(size !== callControlsResizeId) {
+        if (expand) {
+            ui.show('newTicketContainer');
+            height+=80;
+        } else {
+            ui.hide('newTicketContainer');
+        }
+        const callControlsElement = document.getElementById(callControlsContainerId);
+        if(callControlsElement && callControlsElement.style.display === 'flex'){
+            height+=70;
+        }       
+    }
     
-    if (expand) {
-        ui.show('newTicketContainer');
-        height+=100;
-    } else {
-        ui.hide('newTicketContainer');
+    if(size === callControlsResizeId) {
+        const newTicketContainer = document.getElementById('newTicketContainer');
+        if(newTicketContainer && newTicketContainer.style.display === 'block'){
+            height+=80;
+        }
+        ui.show(callControlsContainerId, 'flex')
+        height+=70;
     }
 
-    if(size === callControlsResizeId) {
-        ui.show(callControlsContainerId)
-        height+=100;
+    if(size === 'contactEnded') {
+        ui.hide('newTicketcontainer')
+        ui.hide(callControlsContainerId)
+        height = 510;
     }
 
     zafClient.invoke('resize', {

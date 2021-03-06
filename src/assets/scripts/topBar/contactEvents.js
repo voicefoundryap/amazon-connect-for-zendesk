@@ -37,8 +37,6 @@ const handleContactConnecting = async () => {
 }
 
 const handleContactConnected = async () => {
-    console.log('🎨🎨🎨', appSettings)
-    console.log(appSettings)
     if (session.isMonitoring) return;
 
     if (session.contact.outboundConnection || session.callInProgress)
@@ -154,7 +152,9 @@ const handleContactEnded = async () => {
         await speechAnalysis.sessionClose();
     }
 
-    console.log(logStamp('handleContactEnded'), session.contact.outboundConnection
+    const outbound = session.contact.outboundConnection;
+    const unassignedOutboundCall = outbound && !session.user;
+    console.log(logStamp('handleContactEnded'), outbound
         ? 'outbound'
         : (session.contact.inboundConnection
             ? 'inbound'
@@ -165,7 +165,7 @@ const handleContactEnded = async () => {
         await appendTicketComments.appendTheRest(session.contact, session.ticketId);
         if (appSettings.speechAnalysisEnabled)
             speechAnalysis.updateTicketAttribute(session.ticketId.toString());
-    } else if (appSettings.forceTicketCreation && !(session.isMonitoring)) {
+    } else if (appSettings.forceTicketCreation && !session.isMonitoring && !unassignedOutboundCall) {
         // manual assignment mode, the agent has forgotten to assign - force ticket creation (if configured)
         // set the agent as a requester
         session.user = { name: session.contact.customerNo, id: null }
@@ -178,7 +178,7 @@ const handleContactEnded = async () => {
         }
     }
 
-    resize('down');
+    resize('contactEnded');
     newTicket.setRequesterName(null);
     ui.enable('attachToCurrentBtn', false);
     zafClient.invoke('popover', 'show');
