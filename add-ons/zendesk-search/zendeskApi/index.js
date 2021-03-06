@@ -11,7 +11,7 @@ const customField = require('./customField');
 exports.handler = async (event, context) => {
     // console.log('Received event:', JSON.stringify(event, null, 2));
 
-    const badRequestStatus = { status_code: httpStatus.badRequest };
+    const badRequestStatus = { status: httpStatus.badRequest };
     if (!(event.Name && event.Name === 'ContactFlowEvent')) {
         console.error('Unexpected event:', JSON.stringify(event, null, 2));
         return badRequestStatus;

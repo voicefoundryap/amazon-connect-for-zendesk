@@ -5,7 +5,7 @@ const customField = async (event) => {
     const { Parameters } = event.Details;
     
     if(Object.keys(Parameters).length !== 2) {
-        return { status_code: httpStatus.badRequest };
+        return { status: httpStatus.badRequest };
     }
 
     const [customField, value] = Object.entries(Parameters).find(([key]) => key !== 'search_by'); 

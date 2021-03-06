@@ -4,7 +4,7 @@ const { commonUserFields, commonTicketFields, copiedFields } = require('./return
 
 const template = async (event) => {
     const { Parameters } = event.Details;
-    if (!Parameters.search_template) return { status_code: httpStatus.badRequest };
+    if (!Parameters.search_template) return { status: httpStatus.badRequest };
 
     // populate search template with values
     const params = Object.keys(Parameters).filter((key) => !keywordParams.includes(key));
@@ -14,20 +14,20 @@ const template = async (event) => {
     });
     
     // check for bad formatting
-    if (searchString.includes('{') || searchString.includes('}')) return { status_code: httpStatus.badRequest };
+    if (searchString.includes('{') || searchString.includes('}')) return { status: httpStatus.badRequest };
 
     const webClient = init();
-    if (!webClient) return { status_code: httpStatus.serverError };
+    if (!webClient) return { status: httpStatus.serverError };
 
     let query = `/api/v2/search.json?query=${encodeURIComponent(searchString)}`;
     if (Parameters.sort_by) query += `&sort_by=${Parameters.sort_by}`;
     if (Parameters.sort_order) query += `&sort_order=${Parameters.sort_order}`;
 
     const { results, count } = await searchZendesk(webClient, query);
-    if (!results) return { status_code: httpStatus.serverError };
+    if (!results) return { status: httpStatus.serverError };
     if (!results.length) {
         return { 
-            status_code: httpStatus.notFound,
+            status: httpStatus.notFound,
             ...copiedFields(Parameters.carry_on, Parameters)
         };
     }
@@ -40,7 +40,7 @@ const template = async (event) => {
     }
 
     const response = { 
-        status_code: httpStatus.ok, 
+        status: httpStatus.ok, 
         results_count: count,
         ...copiedFields(Parameters.return_fields, result),
         ...copiedFields(Parameters.carry_on, Parameters)

@@ -1,9 +1,9 @@
 const httpStatus = {
-    ok: 200,
-    badRequest: 400,
-    accessDenied: 403,
-    notFound: 404,
-    serverError: 500
+    ok: "ok", // 200
+    badRequest: "bad request", // 400
+    accessDenied: "access denied", // 403
+    notFound: "not found", // 404
+    serverError: "server error" // 500
 };
 
 const defaults = {
