@@ -208,7 +208,6 @@ export default {
             });
         }
 
-        zafClient.invoke('appsTray.hide');
         zafClient.invoke('routeTo', 'ticket', ticketId);
     }
 }
