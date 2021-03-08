@@ -158,7 +158,7 @@ export default {
         // do we need to update the user with the CLI?
         const cliNumber = session.phoneNo;
         const user = session.user;
-        if (user.id && cliNumber && !isNaN(cliNumber) && cliNumber !== dialableNumber(user.phone)) {
+        if (user && user.id && cliNumber && !isNaN(cliNumber) && cliNumber !== dialableNumber(user.phone)) {
             console.log(logStamp(`Number ${cliNumber} will be added to user ${user.name}`));
             await zafClient.request({
                 url: `/api/v2/users/${user.id}.json`,
