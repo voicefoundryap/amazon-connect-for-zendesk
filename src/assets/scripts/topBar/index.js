@@ -64,6 +64,7 @@ window.onload = (event) => {
         await connectAPI.suspendContactRecording(params).promise().catch((err) => {
             console.error(logStamp('error calling suspendContactRecording: '), err);
         });
+        localStorage.setItem('vf.currentlyRecording', 'false');
         displayCallControls({ isCurrentlyRecording: false });
     })
 
@@ -76,8 +77,9 @@ window.onload = (event) => {
             InstanceId: session.zafInfo.settings.connectInstanceId,
         };
         await connectAPI.resumeContactRecording(params).promise().catch((err) => {
-            console.error(logStamp('error calling suspendContactRecording: '), err);
+            console.error(logStamp('error calling resumeContactRecording: '), err);
         });
+        localStorage.setItem('vf.currentlyRecording', 'true');
         displayCallControls({ isCurrentlyRecording: true });
     })
 
