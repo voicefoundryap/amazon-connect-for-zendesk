@@ -1,12 +1,11 @@
 const commonUserFields = (user) => {
-    const [first, last] = user.name.split(' ');
+    const first = user.name && user.name.match(/^\S+\s?/)[0].trim();    
     return {
         zendesk_user: user.id,
         customer_name: user.name,
         customer_number: user.phone,
         external_id: user.external_id,
         user_name: first,
-        user_surname: last,
         user_email: user.email,
         user_role: user.role,
         user_locale: user.locale,
