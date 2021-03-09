@@ -34,16 +34,16 @@ Metadata:
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
     LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/e62637ea8a114355b985fd86c9ffbd6e
-    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/6e942a9913590f360363ad747e5c1760
+    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/ac726764c3b230464b178d77c8530760
     Labels:
     - Connnect
     - search
     - Zendesk
     - Support-ticket
     - Contact-flow
-    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
     SemanticVersion: '0.0.6'
-    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
 Resources:
   functionZendeskSearch:
     Type: AWS::Serverless::Function
