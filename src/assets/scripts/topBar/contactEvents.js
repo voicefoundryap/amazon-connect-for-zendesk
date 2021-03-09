@@ -47,7 +47,10 @@ const handleContactConnected = async () => {
     if (appSettings.pauseRecording) {
         const errorMessage = await setAWSCredentials(session.contact, appSettings);
         if (!errorMessage) {
-            displayCallControls({ isCurrentlyRecording: appSettings.pauseRecording });
+            const isCurrentlyRecording = session.callInProgress 
+                ? localStorage.getItem('vf.currentlyRecording') === 'true'
+                : appSettings.pauseRecording;
+            displayCallControls({ isCurrentlyRecording });
             console.log(logStamp('pause/resume recording is enabled'));
         } else {
             const message = `${errorMessage}. Pause and resume recording feature will be disabled for this call`;
