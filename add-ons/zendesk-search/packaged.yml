@@ -34,7 +34,7 @@ Metadata:
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
     LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/e62637ea8a114355b985fd86c9ffbd6e
-    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/1e2ceaf0106b73efe8b2bef231e86364
+    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/6e942a9913590f360363ad747e5c1760
     Labels:
     - Connnect
     - search
@@ -42,7 +42,7 @@ Metadata:
     - Support-ticket
     - Contact-flow
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
-    SemanticVersion: '0.0.5'
+    SemanticVersion: '0.0.6'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/zendesk-search
 Resources:
   functionZendeskSearch:
@@ -54,7 +54,7 @@ Resources:
         API for tickets and users
       Runtime: nodejs12.x
       Handler: index.handler
-      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/2866403ea519f2a2656a8f74e62d679b
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/c1cd82f44177b72fd7b1f437edcf31d5
       Timeout: 8
       Policies:
       - AWSLambdaBasicExecutionRole
