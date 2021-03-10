@@ -23,14 +23,16 @@ Parameters:
     ConstraintDescription: Endpoint must be a valid Zendesk Host URL. For example,
       https://voicefoundryap.zendesk.com
   RecentTicketsHours:
-    Type: Number
+    Type: String
     Description: Time span (in hours) within which to search for recently updated
       open tickets (defaults to 72 if not specified here)
+    AllowedPattern: ^([1-9]\d*)?
+    ConstraintDescription: Time span must be a positive whole number.
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: Zendesk-search-for-Connect-contact-flows
-    Description: Enables searching for Zendesk users and tickets within Connect contact
-      flow. To be used with Amazon Connect app for Zendesk.
+    Description: "Enables searching for Zendesk users and tickets within Amazon Connect\xE2\
+      \u20AC\u2122s contact flows. To be used with Amazon Connect app for Zendesk."
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
     LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/e62637ea8a114355b985fd86c9ffbd6e
@@ -42,7 +44,7 @@ Metadata:
     - Support-ticket
     - Contact-flow
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
-    SemanticVersion: '0.0.6'
+    SemanticVersion: '0.0.7'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
 Resources:
   functionZendeskSearch:
