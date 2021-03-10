@@ -25,9 +25,9 @@ Metadata:
     - Zendesk
     - Pause-Resume
     - Recording
-    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/connect-auth
-    SemanticVersion: '0.0.5'
-    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/connect-auth
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/connect-auth
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/connect-auth
 Resources:
   policyConnectFromZendesk:
     Type: AWS::IAM::ManagedPolicy

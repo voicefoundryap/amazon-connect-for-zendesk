@@ -8,19 +8,20 @@ Parameters:
     Type: String
     Default: prod
   ConnectBucket:
-    Description: S3 bucket name for your Connect data storage
+    Description: The name of an S3 bucket where your Connect call recordings are stored
     Type: String
     Default: connect-xyz
     AllowedPattern: '(?=^.{3,63}$)(?!^(\d+\.)+\d+$)(^(([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])\.)*([a-z0-9]|[a-z0-9][a-z0-9\-]*[a-z0-9])$)'
+    ConstraintDescription: "Must be a valid AWS S3 bucket name."
   ConnectMasterKeyId:
-    Description: Key ID of your KMS customer managed key with alias connect-master-key
+    Description: Key ID of your KMS key that your stored call recordings are encrypted with
     Type: String
   ZendeskEmailID:
     Type: String
-    Description:  The Zendesk Admin Email ID for the selected Zendesk Instance
+    Description:  Verified email address of a Zendesk agent or admin for the selected Zendesk Instance
   ZendeskToken:
     Type: String
-    Description: Zendesk Token with Admin privileges.This needs to be generated as a pre-requisite for this installation.
+    Description: Zendesk Token for API access. This needs to be generated as a pre-requisite for this installation.
     NoEcho: true
   ZendeskURL:
     Type: String
@@ -47,9 +48,9 @@ Metadata:
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
     Labels: ['Connnect','Contact-Lens', 'Zendesk', 'Sentiment', 'Transcript']
-    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/contact-lens
-    SemanticVersion: 0.0.6
-    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/contact-lens
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/contact-lens
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/contact-lens
 
 Resources:
 

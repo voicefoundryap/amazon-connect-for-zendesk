@@ -20,10 +20,9 @@ Parameters:
     AllowedPattern: "https://[a-zA-Z0-9-.]+.zendesk.com$"
     ConstraintDescription: "Endpoint must be a valid Zendesk Host URL. For example, https://voicefoundryap.zendesk.com"
   RecentTicketsHours:
-    Type: String
-    Description: Time span (in hours) within which to search for recently updated open tickets (defaults to 72 if not specified here)
-    AllowedPattern: "^([1-9]\\d*)?"
-    ConstraintDescription: "Time span must be a positive whole number."
+    Type: Number
+    Description: Time span (in hours) within which to search for recently updated open tickets
+    Default: 72
   
 ######################### Metadata ############################
 Metadata:
@@ -35,9 +34,9 @@ Metadata:
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
     Labels: ['Connnect','search', 'Zendesk', 'Support-ticket', 'Contact-flow']
-    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
-    SemanticVersion: 0.0.8
-    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/zendesk-search
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/zendesk-search
 
 Resources:
 
