@@ -6,6 +6,11 @@ Parameters:
       created resources (dev, UAT, prod, ...)
     Type: String
     Default: prod
+  SessionExpiry:
+    Type: Number
+    Description: The max contact (call) session duration in seconds. Temporary credentials
+      will expire after this time.
+    Default: 3600
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: Zendesk-Connect-authorization
@@ -21,21 +26,24 @@ Metadata:
     - Pause-Resume
     - Recording
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
-    SemanticVersion: '0.0.2'
+    SemanticVersion: '0.0.4'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
 Resources:
-  policyConnectAll:
+  policyConnectFromZendesk:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName:
-        Fn::Sub: connect-all-${TargetEnvironment}
+        Fn::Sub: connect-from-zendesk-${TargetEnvironment}
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
           Effect: Allow
           Action:
-          - connect:*
-          Resource: '*'
+          - connect:UpdateContactAttributes
+          - connect:ResumeContactRecording
+          - connect:SuspendContactRecording
+          Resource:
+            Fn::Sub: arn:${AWS::Partition}:connect:${AWS::Region}:${AWS::AccountId}:instance/*
   roleAccountAssumeConnect:
     Type: AWS::IAM::Role
     Properties:
@@ -47,12 +55,12 @@ Resources:
         - Effect: Allow
           Principal:
             AWS:
-            - Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+            - Fn::Sub: arn:${AWS::Partition}:iam::${AWS::AccountId}:root
           Action:
           - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
-      - Ref: policyConnectAll
+      - Ref: policyConnectFromZendesk
   policyLambdaAssumeRole:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -75,7 +83,7 @@ Resources:
         for Zendesk to access Connect API
       Runtime: nodejs12.x
       Handler: index.handler
-      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/connect-auth/eb20ee582c2f10dcb407e8da9b4e08b1
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/connect-auth/a80b68919eae37b5758d2a3df2c3d06f
       Timeout: 8
       Policies:
       - AWSLambdaBasicExecutionRole
@@ -84,3 +92,5 @@ Resources:
         Variables:
           ASSUME_ROLE:
             Fn::Sub: ${roleAccountAssumeConnect.Arn}
+          SESSION_EXPIRY:
+            Ref: SessionExpiry

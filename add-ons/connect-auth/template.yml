@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
 ######################### Parameters ##########################
@@ -7,35 +7,41 @@ Parameters:
     Description: Name of your target environment which will be used as a suffix on created resources (dev, UAT, prod, ...)
     Type: String
     Default: prod
-  
+  SessionExpiry:
+    Type: Number
+    Description: The max contact (call) session duration in seconds. Temporary credentials will expire after this time.
+    Default: 3600
+
 ######################### Metadata ############################
 Metadata:
-  'AWS::ServerlessRepo::Application':
+  "AWS::ServerlessRepo::Application":
     Name: Zendesk-Connect-authorization
     Description: Enables Amazon Connect app for Zendesk to access Connect API. Required for certain functionality like pause/resume recording.
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
-    Labels: ['Connnect', 'Zendesk', 'Pause-Resume', 'Recording']
+    Labels: ["Connnect", "Zendesk", "Pause-Resume", "Recording"]
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
-    SemanticVersion: 0.0.2
+    SemanticVersion: 0.0.4
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
 
 Resources:
 
   ######################### Permissions and Roles #############
-  policyConnectAll:
+  policyConnectFromZendesk:
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      ManagedPolicyName: !Sub connect-all-${TargetEnvironment}
+      ManagedPolicyName: !Sub connect-from-zendesk-${TargetEnvironment}
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           Effect: "Allow"
           Action:
-            - 'connect:*'
-          Resource: "*"
+            - "connect:UpdateContactAttributes"
+            - "connect:ResumeContactRecording"
+            - "connect:SuspendContactRecording"
+          Resource: !Sub "arn:${AWS::Partition}:connect:${AWS::Region}:${AWS::AccountId}:instance/*"
 
   roleAccountAssumeConnect:
     Type: AWS::IAM::Role
@@ -47,12 +53,12 @@ Resources:
           - Effect: "Allow"
             Principal:
               AWS:
-                - !Sub "arn:aws:iam::${AWS::AccountId}:root"
+                - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
             Action:
               - "sts:AssumeRole"
       Path: "/"
       ManagedPolicyArns:
-        - !Ref policyConnectAll
+        - !Ref policyConnectFromZendesk
 
   policyLambdaAssumeRole:
     Type: AWS::IAM::ManagedPolicy
@@ -83,3 +89,4 @@ Resources:
       Environment:
         Variables:
           ASSUME_ROLE: !Sub ${roleAccountAssumeConnect.Arn}
+          SESSION_EXPIRY: !Ref SessionExpiry
