@@ -41,21 +41,21 @@ Parameters:
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: Contact-Lens-Analysis-for-Zendesk
-    Description: Appends Amazon Contact Lens analysis to a corresponding Zendesk Support
-      ticket. To be used with Amazon Connect app for Zendesk.
+    Description: Appends Amazon Connect's Contact Lens speech analysis to a corresponding
+      Zendesk Support ticket. To be used with the Amazon Connect app for Zendesk.
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
-    LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens//e62637ea8a114355b985fd86c9ffbd6e
-    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens//803b009a28d964c57d559c9f949a95f0
+    LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens/e62637ea8a114355b985fd86c9ffbd6e
+    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens/4a0246023352bbc9fee5374be8643d61
     Labels:
     - Connnect
     - Contact-Lens
     - Zendesk
     - Sentiment
     - Transcript
-    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/contact-lens
-    SemanticVersion: '0.0.5'
-    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/contact-lens
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/contact-lens
+    SemanticVersion: '0.0.6'
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/contact-lens
 Resources:
   tableZendeskRetries:
     Type: AWS::DynamoDB::Table
@@ -82,7 +82,7 @@ Resources:
         and updates the matching Zendesk support ticket
       Runtime: nodejs12.x
       Handler: index.handler
-      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens//b8dc42d486cebb09d843c1462d389e3f
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens/b8dc42d486cebb09d843c1462d389e3f
       Timeout: 240
       Policies:
       - AWSLambdaBasicExecutionRole

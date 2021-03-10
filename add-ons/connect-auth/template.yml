@@ -16,15 +16,15 @@ Parameters:
 Metadata:
   "AWS::ServerlessRepo::Application":
     Name: Zendesk-Connect-authorization
-    Description: Enables Amazon Connect app for Zendesk to access Connect API. Required for certain functionality like pause/resume recording.
+    Description: Enables the Amazon Connect app for Zendesk to access the Connect API. Required for certain functionality like pause and/ resume call recordings.
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
     LicenseUrl: LICENSE
     ReadmeUrl: README.md
     Labels: ["Connnect", "Zendesk", "Pause-Resume", "Recording"]
-    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
-    SemanticVersion: 0.0.4
-    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/add-ons/connect-auth
+    HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/connect-auth
+    SemanticVersion: 0.0.5
+    SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/connect-auth
 
 Resources:
 

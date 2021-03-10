@@ -31,12 +31,12 @@ Parameters:
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: Zendesk-search-for-Connect-contact-flows
-    Description: "Enables searching for Zendesk users and tickets within Amazon Connect\xE2\
-      \u20AC\u2122s contact flows. To be used with Amazon Connect app for Zendesk."
+    Description: Enables searching for Zendesk users and tickets within Amazon Connect's
+      contact flows. To be used with Amazon Connect app for Zendesk.
     Author: VoiceFoundry-APAC
     SpdxLicenseId: GPL-3.0-or-later
     LicenseUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/e62637ea8a114355b985fd86c9ffbd6e
-    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/ac726764c3b230464b178d77c8530760
+    ReadmeUrl: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/zendesk-search/547af121d33d8574931ece28cfa6549e
     Labels:
     - Connnect
     - search
@@ -44,7 +44,7 @@ Metadata:
     - Support-ticket
     - Contact-flow
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
-    SemanticVersion: '0.0.7'
+    SemanticVersion: '0.0.8'
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
 Resources:
   functionZendeskSearch:

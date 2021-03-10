@@ -36,7 +36,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['Connnect','search', 'Zendesk', 'Support-ticket', 'Contact-flow']
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
-    SemanticVersion: 0.0.7
+    SemanticVersion: 0.0.8
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/release/add-ons/zendesk-search
 
 Resources:
