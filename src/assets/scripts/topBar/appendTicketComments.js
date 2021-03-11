@@ -74,7 +74,6 @@ const updateTicketWithContactDetails = async (contact, ticketId) => {
     // adds information to an existing ticket about the call, including a link to call recording
     // console.log(logStamp(`Updating ticket #${ticketId} with contact details`), contact);
 
-    let direction;
     let htmlBody = '', plainBody = '';
 
     outboundCli = appSettings.outboundCli;
@@ -134,7 +133,7 @@ const updateTicketWithContactDetails = async (contact, ticketId) => {
                 plain_body: plainBody,
                 public: false
             },
-            via_id: direction === 'inbound' ? 45 : 46
+            via_id: session.outbound ? 46 : 45
         });
     }
 }
