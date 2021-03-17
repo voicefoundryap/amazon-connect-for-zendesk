@@ -217,30 +217,15 @@ export default (contact) => {
         localStorage.setItem('vf.contactProcessingWindow', session.windowId);
     } else if (contactProcessingWindow !== session.windowId) return;
 
-    if (session.agent.getStatus().name.toLowerCase() === 'busy') {
-        // call in progress
-        console.warn(logStamp('call in progress!'));
-        session.callInProgress = true;
-    }
-
-    session.contact = contact;
-    const currentContact = session.contact;
-
     try {
-        // simulating various errors
-        const simAttributes = contact.getAttributes();
-        let simulateEmptyEndpoint = false;
-        if (simAttributes["zendesk_ticket"])
-            switch (simAttributes["zendesk_ticket"].value) {
-                case "9":
-                    simulateEmptyEndpoint = true;
-                    delete simAttributes["zendesk_ticket"];
-                    break;
-                case "7": // simulate exception
-                    throw "Simulated exception";
-                default:
-                    break;
-            }
+        if (session.agent.getStatus().name.toLowerCase() === 'busy') {
+            // call in progress
+            console.warn(logStamp('call in progress!'));
+            session.callInProgress = true;
+        }
+
+        session.contact = contact;
+        const currentContact = session.contact;
 
         currentContact.snapshot = contact.toSnapshot();
         const activeConnection = contact.getActiveInitialConnection();
@@ -248,7 +233,6 @@ export default (contact) => {
         const connectionId = activeConnection['connectionId'];
         const connection = new connect.Connection(currentContact.contactId, connectionId);
         let endpoint = connection.getEndpoint();
-        if (simulateEmptyEndpoint) endpoint = {};
 
         const currentConnections = currentContact.snapshot.contactData.connections;
         currentContact.inboundConnection = currentConnections.find((connection) => connection.type === 'inbound');
