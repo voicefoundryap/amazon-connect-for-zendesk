@@ -42,12 +42,12 @@ const handleContactConnected = async () => {
     if (session.contact.outboundConnection || session.callInProgress)
         await appConfig.applyAttributes(session);
     appSettings = session.zafInfo.settings;
-    
+
     // enabling pause/resume recording
     if (appSettings.pauseRecording) {
         const errorMessage = await setAWSCredentials(session.contact, appSettings);
         if (!errorMessage) {
-            const isCurrentlyRecording = session.callInProgress 
+            const isCurrentlyRecording = session.callInProgress
                 ? localStorage.getItem('vf.currentlyRecording') === 'true'
                 : appSettings.pauseRecording;
             displayCallControls({ isCurrentlyRecording });
@@ -223,30 +223,37 @@ export default (contact) => {
         session.callInProgress = true;
     }
 
-    // console.log(logStamp('Subscribing to events for contact'), contact);
-    // if (contact.getActiveInitialConnection() && contact.getActiveInitialConnection().getEndpoint()) {
-    //     console.log(logStamp('subscribeToContactEvents'), `New contact is from ${contact.getActiveInitialConnection().getEndpoint().phoneNumber}`);
-    // }
-    // else {
-    //     console.log(logStamp('subscribeToContactEvents'), 'This is an existing contact for this agent');
-    // }
-    // console.log(logStamp('subscribeToContactEvents'), `Contact is from queue ${contact.getQueue().name}`);
-
     session.contact = contact;
-
     const currentContact = session.contact;
-    const activeConnection = contact.getActiveInitialConnection();
-    currentContact.contactId = activeConnection['contactId'];
-    const connectionId = activeConnection['connectionId'];
-    const connection = new connect.Connection(currentContact.contactId, connectionId);
-    currentContact.customerNo = connection.getEndpoint().phoneNumber;
-    currentContact.snapshot = contact.toSnapshot();
-
-    const currentConnections = currentContact.snapshot.contactData.connections;
-    currentContact.inboundConnection = currentConnections.find((connection) => connection.type === 'inbound');
-    currentContact.outboundConnection = currentConnections.find((connection) => connection.type === 'outbound');
 
     try {
+        // simulating various errors
+        const simAttributes = contact.getAttributes();
+        let simulateEmptyEndpoint = false;
+        if (simAttributes["zendesk_ticket"])
+            switch (simAttributes["zendesk_ticket"].value) {
+                case "9":
+                    simulateEmptyEndpoint = true;
+                    delete simAttributes["zendesk_ticket"];
+                    break;
+                case "7": // simulate exception
+                    throw "Simulated exception";
+                default:
+                    break;
+            }
+
+        currentContact.snapshot = contact.toSnapshot();
+        const activeConnection = contact.getActiveInitialConnection();
+        currentContact.contactId = activeConnection['contactId'];
+        const connectionId = activeConnection['connectionId'];
+        const connection = new connect.Connection(currentContact.contactId, connectionId);
+        let endpoint = connection.getEndpoint();
+        if (simulateEmptyEndpoint) endpoint = {};
+
+        const currentConnections = currentContact.snapshot.contactData.connections;
+        currentContact.inboundConnection = currentConnections.find((connection) => connection.type === 'inbound');
+        currentContact.outboundConnection = currentConnections.find((connection) => connection.type === 'outbound');
+
         // don't create tickets for supervisors monitoring calls
         session.isMonitoring = !(currentContact.outboundConnection || currentContact.inboundConnection);
         console.log(logStamp('is it monitoring? '), session.isMonitoring);
@@ -256,8 +263,20 @@ export default (contact) => {
         currentContact.initialContactId = data.initialContactId;
         console.log(logStamp('is it a transfer? '), session.isTransfer);
 
+        currentContact.customerNo = endpoint.phoneNumber;
+        if (!session.isTransfer && !currentContact.customerNo) {
+            console.error(logStamp('No phoneNumber on endpoint:'), endpoint);
+            const message = 'No phone number detected, defaulting to anonymous.';
+            zafClient.invoke('notify', message, 'error', { sticky: true });
+            currentContact.customerNo = 'anonymous';
+        }
+
     } catch (err) {
         console.error(logStamp("Error on new contact: "), err);
+        session.clear();
+        const message = 'Unexpected technical error with the new contact. Aborting.';
+        zafClient.invoke('notify', message, 'error', { sticky: true });
+        return;
     }
 
     session.state = { connecting: false, callback: false, connected: false, callEnded: false };
