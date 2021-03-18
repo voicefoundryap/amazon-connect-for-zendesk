@@ -19,7 +19,6 @@ export default {
 
     clear: function() {
         this.contact = {};
-        this.agent = {};
         this.state = {
             callback: false,
             connecting: false,

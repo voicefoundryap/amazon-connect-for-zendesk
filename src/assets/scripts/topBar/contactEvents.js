@@ -203,22 +203,21 @@ const logContactState = (contact, handlerName, description) => {
 
 export default (contact) => {
 
-    console.log(logStamp('Checking contact processing eligibility'), {
-        visibility: document.visibilityState,
-        processingWindow: localStorage.getItem('vf.contactProcessingWindow'),
-        windowId: session.windowId
-    });
-    // don't do anything with this contact if this tab/window is in the background
-    if (document.visibilityState !== 'visible') return;
     let contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
-    if (!contactProcessingWindow) {
-        // this windows is claiming the contact processing eligibility for this call
-        console.log(logStamp('claiming eligibility for: '), session.windowId);
+    if (contactProcessingWindow && contactProcessingWindow !== session.windowId) {
+        // some other window/tab beat us to it
+        console.log(logStamp("Contact will be processed in another window: "), contactProcessingWindow);
+        return;
+    } else if (!contactProcessingWindow) {
+        // this windows is claiming the contact processing for this call
         localStorage.setItem('vf.contactProcessingWindow', session.windowId);
-    } else if (contactProcessingWindow !== session.windowId) return;
+        console.log(logStamp('Claimed contact processing for: '), session.windowId);
+    }
 
     try {
-        if (session.agent.getStatus().name.toLowerCase() === 'busy') {
+        const agentStatus = session.agent.getStatus().name;
+        console.log(logStamp('agent status: '), agentStatus);
+        if (agentStatus.toLowerCase() === 'busy') {
             // call in progress
             console.warn(logStamp('call in progress!'));
             session.callInProgress = true;
@@ -229,6 +228,9 @@ export default (contact) => {
 
         currentContact.snapshot = contact.toSnapshot();
         const activeConnection = contact.getActiveInitialConnection();
+        // abort if reloaded into after call work
+        if (!activeConnection && agentStatus.toLowerCase() === "aftercallwork") return;
+        
         currentContact.contactId = activeConnection['contactId'];
         const connectionId = activeConnection['connectionId'];
         const connection = new connect.Connection(currentContact.contactId, connectionId);
@@ -286,6 +288,9 @@ export default (contact) => {
     });
 
     contact.onConnected((contact) => {
+        contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
+        if (contactProcessingWindow !== session.windowId) return;
+
         logContactState(contact, 'handleContactConnected', 'Contact connected to agent');
         if (!session.state.connected) {
             session.state.connected = true;
@@ -297,6 +302,9 @@ export default (contact) => {
     });
 
     contact.onEnded((contact) => {
+        contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
+        if (contactProcessingWindow !== session.windowId) return;
+
         logContactState(contact, 'handleContactEnded', 'Contact has ended successfully');
         handleContactEnded()
             .then((result) => result)
