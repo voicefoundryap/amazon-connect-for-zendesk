@@ -12,7 +12,7 @@ import { displayCallControls } from './callControls.js';
 
 window.onload = (event) => {
     // first, establish the window (tab) id
-    const windowIdKey = "vf.windowId"
+    const windowIdKey = 'vf.windowId';
     let windowId = sessionStorage.getItem(windowIdKey);
     if (!windowId) {
         windowId = uuidv4();
@@ -23,9 +23,19 @@ window.onload = (event) => {
         console.log(logStamp('reloaded window/tab'), windowId);
     }
     session.windowId = windowId;
-    window.addEventListener("beforeunload", () => {
-        sessionStorage.setItem(windowIdKey, windowId)
+    window.addEventListener('beforeunload', () => {
+        sessionStorage.setItem(windowIdKey, windowId);
+        if (localStorage.getItem('vf.windowInFocus') === windowId) {
+            localStorage.removeItem('vf.windowInFocus');
+            console.log(logStamp('cleared window in focus: '), windowId);
+        }
     });
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'visible') {
+            console.log(logStamp('setting window in focus: '), windowId);
+            localStorage.setItem('vf.windowInFocus', windowId);
+        }
+    }, false);
 
     window.vfConnectTimeout = window.setTimeout(() => {
         // ui.swapImage('loadingImg', 'prohibited.png');

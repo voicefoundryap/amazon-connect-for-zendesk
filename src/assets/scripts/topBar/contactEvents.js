@@ -204,11 +204,20 @@ const logContactState = (contact, handlerName, description) => {
 export default (contact) => {
 
     let contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
+    const windowInFocus = localStorage.getItem('vf.windowInFocus');
     if (contactProcessingWindow && contactProcessingWindow !== session.windowId) {
         // some other window/tab beat us to it
-        console.log(logStamp("Contact will be processed in another window: "), contactProcessingWindow);
+        console.log(logStamp("Contact will be processed in existing processing window: "), contactProcessingWindow);
         return;
     } else if (!contactProcessingWindow) {
+        // selecting a new processing window/tab
+        if (windowInFocus) {
+            // if there's another window in focus, leave it to them
+            if (windowInFocus !== session.windowId) {
+                console.log(logStamp("Contact will be processed in existing, focused window: "), windowInFocus);
+                return;
+            }
+        }
         // this windows is claiming the contact processing for this call
         localStorage.setItem('vf.contactProcessingWindow', session.windowId);
         console.log(logStamp('Claimed contact processing for: '), session.windowId);
@@ -230,7 +239,7 @@ export default (contact) => {
         const activeConnection = contact.getActiveInitialConnection();
         // abort if reloaded into after call work
         if (!activeConnection && agentStatus.toLowerCase() === "aftercallwork") return;
-        
+
         currentContact.contactId = activeConnection['contactId'];
         const connectionId = activeConnection['connectionId'];
         const connection = new connect.Connection(currentContact.contactId, connectionId);

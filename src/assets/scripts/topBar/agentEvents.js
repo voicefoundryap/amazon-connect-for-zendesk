@@ -26,6 +26,7 @@ export default (agent) => {
         // console.log(logStamp(`Agent is routable. Agent status is [${agent.getStatus().name}]`));
         resize('down');
         newTicket.setRequesterName(null);
+        session.clearStorage();
     });
 
     agent.onNotRoutable((agent) => {

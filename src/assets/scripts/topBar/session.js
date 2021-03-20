@@ -41,6 +41,16 @@ export default {
         this.appConfig.forEach((setting) => this.zafInfo.settings[setting.name] = setting.value || setting.default);
         this.callInProgress = false;
         this.pauseRecording = false;
+        this.clearStorage();
+    },
+
+    clearStorage: function() {
+        // preserve just the focused window
+        const inFocus = localStorage.getItem('vf.windowInFocus');
         localStorage.clear();
+        if (inFocus) {
+            // needs an out of thread execution for some reason
+            window.setTimeout(() => { localStorage.setItem('vf.windowInFocus', inFocus) }, 0); 
+        }
     }
 }
