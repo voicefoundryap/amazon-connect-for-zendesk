@@ -1,5 +1,6 @@
 import logStamp from '../util/log.js';
 import session from './session.js';
+import { zafClient } from './zafClient.js';
 import ui from './ui.js'
 import newTicket from './newTicket.js';
 import { resize } from './core.js';
@@ -16,6 +17,11 @@ export default (agent) => {
     ui.show('ccpContainer');
 
     session.agent = agent;
+    
+    const routingStatus = agent.getStatus().type;
+    console.log(logStamp('agent routing status: '), routingStatus);
+    // pop CCP open if not routable
+    if (routingStatus.toLowerCase() !== "routable") zafClient.invoke('popover', 'show');
 
     agent.onRefresh((agent) => {
         // console.log(logStamp(`Agent is refreshed. Agent status is [${agent.getStatus().name}]`), agent.getStatus());

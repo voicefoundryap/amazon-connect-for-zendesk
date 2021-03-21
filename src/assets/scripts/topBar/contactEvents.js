@@ -203,29 +203,34 @@ const logContactState = (contact, handlerName, description) => {
 
 export default (contact) => {
 
-    let contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
-    const windowInFocus = localStorage.getItem('vf.windowInFocus');
-    if (contactProcessingWindow && contactProcessingWindow !== session.windowId) {
-        // some other window/tab beat us to it
-        console.log(logStamp("Contact will be processed in existing processing window: "), contactProcessingWindow);
-        return;
-    } else if (!contactProcessingWindow) {
-        // selecting a new processing window/tab
-        if (windowInFocus) {
-            // if there's another window in focus, leave it to them
-            if (windowInFocus !== session.windowId) {
-                console.log(logStamp("Contact will be processed in existing, focused window: "), windowInFocus);
-                return;
-            }
-        }
-        // this windows is claiming the contact processing for this call
-        localStorage.setItem('vf.contactProcessingWindow', session.windowId);
-        console.log(logStamp('Claimed contact processing for: '), session.windowId);
-    }
-
     try {
         const agentStatus = session.agent.getStatus().name;
-        console.log(logStamp('agent status: '), agentStatus);
+        // abort if loaded into after call work
+        if (agentStatus.toLowerCase() === "aftercallwork") {
+            console.warn(logStamp('agent is in After Call Work, aborting! '));
+            return;
+        }
+        let processingTab = localStorage.getItem('vf.processingTab');
+        if (processingTab && processingTab !== session.windowId) {
+            // some other window/tab beat us to it
+            console.log(logStamp("Contact will be processed in existing processing tab: "), processingTab);
+            return;
+        }
+        if (!processingTab) {
+            let tabs = JSON.parse(localStorage.getItem('vf.tabsInFocus')) || [];
+            if (!tabs.length) { // user must have cleared the cache or something else unexpected happen
+                session.refocusTabs(); // in this case set the current window/tab as the one in focus
+                console.error(logStamp('No focused tabs! Elected the current one: '), session.windowId);
+                tabs = [session.windowId];
+            }
+            if (tabs[0] !== session.windowId) {
+                console.log(logStamp("Contact will be processed in another, focused tab: "), tabs[0]);
+                return;
+            }
+            localStorage.setItem('vf.processingTab', session.windowId); // need this for tab reloading
+        }
+        console.log(logStamp('Claimed contact processing in tab: '), session.windowId);
+
         if (agentStatus.toLowerCase() === 'busy') {
             // call in progress
             console.warn(logStamp('call in progress!'));
@@ -237,8 +242,6 @@ export default (contact) => {
 
         currentContact.snapshot = contact.toSnapshot();
         const activeConnection = contact.getActiveInitialConnection();
-        // abort if reloaded into after call work
-        if (!activeConnection && agentStatus.toLowerCase() === "aftercallwork") return;
 
         currentContact.contactId = activeConnection['contactId'];
         const connectionId = activeConnection['connectionId'];
@@ -297,9 +300,6 @@ export default (contact) => {
     });
 
     contact.onConnected((contact) => {
-        contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
-        if (contactProcessingWindow !== session.windowId) return;
-
         logContactState(contact, 'handleContactConnected', 'Contact connected to agent');
         if (!session.state.connected) {
             session.state.connected = true;
@@ -311,9 +311,6 @@ export default (contact) => {
     });
 
     contact.onEnded((contact) => {
-        contactProcessingWindow = localStorage.getItem('vf.contactProcessingWindow');
-        if (contactProcessingWindow !== session.windowId) return;
-
         logContactState(contact, 'handleContactEnded', 'Contact has ended successfully');
         handleContactEnded()
             .then((result) => result)

@@ -17,7 +17,7 @@ export default {
     callInProgress: false,
     pauseRecording: false,
 
-    clear: function() {
+    clear: function () {
         this.contact = {};
         this.state = {
             callback: false,
@@ -44,13 +44,21 @@ export default {
         this.clearStorage();
     },
 
-    clearStorage: function() {
+    clearStorage: function () {
         // preserve just the focused window
-        const inFocus = localStorage.getItem('vf.windowInFocus');
+        const tabs = localStorage.getItem('vf.tabsInFocus');
         localStorage.clear();
-        if (inFocus) {
+        if (tabs) {
             // needs an out of thread execution for some reason
-            window.setTimeout(() => { localStorage.setItem('vf.windowInFocus', inFocus) }, 0); 
+            window.setTimeout(() => { localStorage.setItem('vf.tabsInFocus', tabs) }, 0);
         }
+    },
+
+    refocusTabs: function (focus = true) {
+        // make the current tab the most recent (index 0) or remove it from the list
+        let tabs = JSON.parse(localStorage.getItem('vf.tabsInFocus')) || [];
+        tabs = [...tabs.filter((tabId) => tabId !== this.windowId)];
+        if (focus) tabs = [this.windowId, ...tabs];
+        localStorage.setItem('vf.tabsInFocus', JSON.stringify(tabs));
     }
 }

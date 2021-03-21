@@ -25,16 +25,10 @@ window.onload = (event) => {
     session.windowId = windowId;
     window.addEventListener('beforeunload', () => {
         sessionStorage.setItem(windowIdKey, windowId);
-        if (localStorage.getItem('vf.windowInFocus') === windowId) {
-            localStorage.removeItem('vf.windowInFocus');
-            console.log(logStamp('cleared window in focus: '), windowId);
-        }
+        session.refocusTabs(false);
     });
     document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === 'visible') {
-            console.log(logStamp('setting window in focus: '), windowId);
-            localStorage.setItem('vf.windowInFocus', windowId);
-        }
+        if (document.visibilityState === 'visible') session.refocusTabs();
     }, false);
 
     window.vfConnectTimeout = window.setTimeout(() => {
