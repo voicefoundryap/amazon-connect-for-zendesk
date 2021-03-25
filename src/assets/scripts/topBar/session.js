@@ -17,13 +17,12 @@ export default {
     callInProgress: false,
     pauseRecording: false,
 
-    clear: function () {
+    clear: function (withStorage = true) {
         this.contact = {};
         this.state = {
             callback: false,
             connecting: false,
-            connected: false,
-            callEnded: false
+            connected: false
         };
         this.isTransfer = false;
         this.isMonitoring = false;
@@ -41,24 +40,16 @@ export default {
         this.appConfig.forEach((setting) => this.zafInfo.settings[setting.name] = setting.value || setting.default);
         this.callInProgress = false;
         this.pauseRecording = false;
-        this.clearStorage();
+        if (withStorage) this.clearStorage();
     },
 
     clearStorage: function () {
         // preserve just the focused window
-        const tabs = localStorage.getItem('vf.tabsInFocus');
+        const focusedTab = localStorage.getItem('vf.tabInFocus');
         localStorage.clear();
-        if (tabs) {
+        if (focusedTab) {
             // needs an out of thread execution for some reason
-            window.setTimeout(() => { localStorage.setItem('vf.tabsInFocus', tabs) }, 0);
+            window.setTimeout(() => { localStorage.setItem('vf.tabInFocus', focusedTab) }, 0);
         }
-    },
-
-    refocusTabs: function (focus = true) {
-        // make the current tab the most recent (index 0) or remove it from the list
-        let tabs = JSON.parse(localStorage.getItem('vf.tabsInFocus')) || [];
-        tabs = [...tabs.filter((tabId) => tabId !== this.windowId)];
-        if (focus) tabs = [this.windowId, ...tabs];
-        localStorage.setItem('vf.tabsInFocus', JSON.stringify(tabs));
     }
 }

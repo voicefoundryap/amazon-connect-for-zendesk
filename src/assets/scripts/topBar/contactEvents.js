@@ -19,6 +19,22 @@ import('../sideBar/speechAnalysis.js')
     .then((module) => { speechAnalysis = module.default })
     .catch((err) => console.log(logStamp('real-time speech analysis is not present and will not be used')));
 
+const setProcessingTab = () => {
+    let focusedTab = localStorage.getItem('vf.tabInFocus');
+    if (!focusedTab) {
+        // user must have cleared the cache or something else unexpected happen
+        focusedTab = session.windowId;
+        localStorage.setItem('vf.tabInFocus', focusedTab);
+        console.error(logStamp('No focused tab! Elected the current one: '), focusedTab);
+    }
+    if (focusedTab !== session.windowId) {
+        console.log(logStamp("Contact will be processed in another, focused tab: "), focusedTab);
+        return;
+    }
+    localStorage.setItem('vf.processingTab', session.windowId);
+    console.log(logStamp('Claimed contact processing in tab: '), session.windowId);
+}
+
 const handleContactConnecting = async () => {
     zafClient.invoke('popover', 'show');
     console.log(logStamp('Contact connecting: '), session.contact);
@@ -34,6 +50,7 @@ const handleContactConnecting = async () => {
             await processInboundCall(session.contact);
         }
     }
+    if (session.contact.outboundConnection) setProcessingTab();
 }
 
 const handleContactConnected = async () => {
@@ -147,7 +164,6 @@ const handleContactEnded = async () => {
         return;
     }
 
-    session.state.callEnded = true;
     session.state.connected = false;
     // cleanup session data for the next call
     if (appSettings.speechAnalysisEnabled) {
@@ -194,11 +210,16 @@ const handleIncomingCallback = async () => {
     zafClient.invoke('popover', 'show');
 }
 
+const handleContactAccepted = async () => {
+    // console.log(logStamp(`handleContactAccepted`));
+    setProcessingTab();
+}
+
 const logContactState = (contact, handlerName, description) => {
     if (contact)
-        console.log(logStamp(handlerName), `${description}. Contact state is ${contact.getStatus().type}`);
+        console.log(logStamp(handlerName), `${description}. Contact state is ${contact.getStatus ? contact.getStatus().type : 'undefined'}`);
     else
-        console.warn(logStamp(handlerName), `${description}. Null contact passed to event handler`);
+        console.error(logStamp(handlerName), `${description}. Null contact passed to event handler`);
 }
 
 export default (contact) => {
@@ -210,26 +231,6 @@ export default (contact) => {
             console.warn(logStamp('agent is in After Call Work, aborting! '));
             return;
         }
-        let processingTab = localStorage.getItem('vf.processingTab');
-        if (processingTab && processingTab !== session.windowId) {
-            // some other window/tab beat us to it
-            console.log(logStamp("Contact will be processed in existing processing tab: "), processingTab);
-            return;
-        }
-        if (!processingTab) {
-            let tabs = JSON.parse(localStorage.getItem('vf.tabsInFocus')) || [];
-            if (!tabs.length) { // user must have cleared the cache or something else unexpected happen
-                session.refocusTabs(); // in this case set the current window/tab as the one in focus
-                console.error(logStamp('No focused tabs! Elected the current one: '), session.windowId);
-                tabs = [session.windowId];
-            }
-            if (tabs[0] !== session.windowId) {
-                console.log(logStamp("Contact will be processed in another, focused tab: "), tabs[0]);
-                return;
-            }
-            localStorage.setItem('vf.processingTab', session.windowId); // need this for tab reloading
-        }
-        console.log(logStamp('Claimed contact processing in tab: '), session.windowId);
 
         if (agentStatus.toLowerCase() === 'busy') {
             // call in progress
@@ -299,7 +300,20 @@ export default (contact) => {
         }
     });
 
+    contact.onAccepted((contact) => {
+        logContactState(contact, 'handleContactAccepted', 'Contact accepted by the agent');
+        handleContactAccepted()
+            .then((result) => result)
+            .catch((err) => { console.error(logStamp('handleContactAccepted'), err) });
+    });
+
     contact.onConnected((contact) => {
+        const processingTab = localStorage.getItem('vf.processingTab');
+        if (processingTab !== session.windowId) {
+            console.log(logStamp('onConnected is processed in the other tab: '), processingTab)
+            return;
+        }
+
         logContactState(contact, 'handleContactConnected', 'Contact connected to agent');
         if (!session.state.connected) {
             session.state.connected = true;
@@ -311,10 +325,22 @@ export default (contact) => {
     });
 
     contact.onEnded((contact) => {
+        const processingTab = localStorage.getItem('vf.processingTab');
+        if (processingTab !== session.windowId) {
+            if (processingTab)
+                console.log(logStamp('onEnded is processed in the other tab: '), processingTab)
+            else
+                console.log(logStamp('onEnded ignored, no processing tab active'))
+            session.clear(false);
+            return;
+        }
         logContactState(contact, 'handleContactEnded', 'Contact has ended successfully');
-        handleContactEnded()
-            .then((result) => result)
-            .catch((err) => { console.error(logStamp('handleContactEnded'), err) });
+        if (!session.state.callEnded) {
+            session.state.callEnded = true;
+            handleContactEnded()
+                .then((result) => result)
+                .catch((err) => { console.error(logStamp('handleContactEnded'), err) });
+        }
     });
 
 }

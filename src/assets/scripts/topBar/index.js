@@ -25,10 +25,11 @@ window.onload = (event) => {
     session.windowId = windowId;
     window.addEventListener('beforeunload', () => {
         sessionStorage.setItem(windowIdKey, windowId);
-        session.refocusTabs(false);
     });
     document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === 'visible') session.refocusTabs();
+        if (document.visibilityState === 'visible') {
+            localStorage.setItem('vf.tabInFocus', session.windowId);
+        }
     }, false);
 
     window.vfConnectTimeout = window.setTimeout(() => {
