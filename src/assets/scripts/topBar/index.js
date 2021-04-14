@@ -32,6 +32,8 @@ window.onload = (event) => {
         }
     }, false);
 
+    if (window.LogRocket) LogRocket.init('61he5n/zendesk-exqmt');
+
     window.vfConnectTimeout = window.setTimeout(() => {
         // ui.swapImage('loadingImg', 'prohibited.png');
         ui.show('whitelisting');

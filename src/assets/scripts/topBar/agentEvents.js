@@ -16,8 +16,18 @@ export default (agent) => {
     ui.hide('loadingContainer');
     ui.show('ccpContainer');
 
+    if (window.LogRocket) {
+        const agentData = agent.getConfiguration();
+        LogRocket.identify(agentData.username, {
+            name: agentData.name,
+            email: agentData.username,
+            routingProfile: agentData.routingProfile.name,
+            zendeskClient: session.zafInfo.settings.subdomain
+        });
+    }
+
     session.agent = agent;
-    
+
     const routingStatus = agent.getStatus().type;
     console.log(logStamp('agent routing status: '), routingStatus);
     // pop CCP open if not routable
