@@ -243,7 +243,6 @@ export default (contact) => {
 
         currentContact.snapshot = contact.toSnapshot();
         const activeConnection = contact.getActiveInitialConnection();
-
         currentContact.contactId = activeConnection['contactId'];
         const connectionId = activeConnection['connectionId'];
         const connection = new connect.Connection(currentContact.contactId, connectionId);
