@@ -27,6 +27,11 @@ export default (agent) => {
     }
 
     session.agent = agent;
+    
+    const routingStatus = agent.getStatus().type;
+    console.log(logStamp('agent routing status: '), routingStatus);
+    // pop CCP open if not routable
+    if (routingStatus.toLowerCase() !== "routable") zafClient.invoke('popover', 'show');
 
     const routingStatus = agent.getStatus().type;
     console.log(logStamp('agent routing status: '), routingStatus);
