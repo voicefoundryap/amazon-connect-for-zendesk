@@ -44,12 +44,15 @@ export default {
     },
 
     clearStorage: function () {
-        // preserve just the focused window
-        const focusedTab = localStorage.getItem('vf.tabInFocus');
-        localStorage.clear();
-        if (focusedTab) {
-            // needs an out of thread execution for some reason
-            window.setTimeout(() => { localStorage.setItem('vf.tabInFocus', focusedTab) }, 0);
-        }
+        // preserve just the focused window ('vf.tabInfocus')
+        const vfStorage = [
+            'vf.storedAttributes', 
+            'vf.processingTab', 
+            'vf.currentlyRecording', 
+            'vf.viewingUserId', 
+            'vf.viewingTicketId',
+            'vf.assignedTicketId', 
+        ];
+        vfStorage.forEach((key) => localStorage.removeItem(key));
     }
 }
