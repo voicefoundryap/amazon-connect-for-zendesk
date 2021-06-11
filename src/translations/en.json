@@ -36,6 +36,10 @@
       "timeZone": {
         "label": "Connect time zone (optional)",
         "helpText": "Enter time zone, eg. Australia/Sydney, so that the Contact Trace Records linked from within ticket comments will display in desired local date/time. If not specified it will default to UTC. You can view a list of the different time zones [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)."
+      },
+      "clientLogProject": {
+        "label": "Client-side logging project name",
+        "helpText": "Enables client-side logging via LogRocket and uploads the logs under this project name."
       }
     }
   }

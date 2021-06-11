@@ -32,8 +32,6 @@ window.onload = (event) => {
         }
     }, false);
 
-    if (window.LogRocket) LogRocket.init('61he5n/zendesk-exqmt');
-
     window.vfConnectTimeout = window.setTimeout(() => {
         // ui.swapImage('loadingImg', 'prohibited.png');
         ui.show('whitelisting');
@@ -97,6 +95,16 @@ window.onload = (event) => {
             // console.log(logStamp('zafClient metadata'), metadata);
             const appSettings = session.zafInfo.settings;
             // console.log(logStamp('app settings'), appSettings);
+
+            const clientLogProject = appSettings.clientLogProject || 'zendesk-exqmt'
+            if (window.LogRocket) {
+                try {
+                    LogRocket.init(`61he5n/${clientLogProject}`);
+                }
+                catch (err) {
+                    console.log(logStamp('error initializing LogRocket'), err);
+                }
+            }
 
             zafClient.context().then((context) => {
                 // console.log(logStamp('zafClient context'), context);

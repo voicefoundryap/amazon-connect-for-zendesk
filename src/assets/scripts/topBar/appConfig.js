@@ -120,6 +120,13 @@ const hardcoded = [
         type: "checkbox",
         default: false,
         attribute: "pause_recording"
+    },
+    {
+        name: "clientLogProject",
+        label: "Client-side logging project name",
+        description: "Enables client-side logging via LogRocket and uploads the logs under this project name.",
+        type: "text",
+        attribute: ""
     }
 ];
 

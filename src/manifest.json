@@ -92,8 +92,14 @@
       "name": "medialess",
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "clientLogProject",
+      "required": true,
+      "type": "text",
+      "default": ""
     }
   ],
-  "version": "2.2.2",
+  "version": "2.2.2-LR",
   "frameworkVersion": "2.0"
 }
