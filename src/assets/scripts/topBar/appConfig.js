@@ -25,7 +25,7 @@ const hardcoded = [
         label: "Force ticket creation for every call",
         description: "When ticket assignment is set to \"agent\" this flag determines whether to force create a ticket in case agent hasn't created or assigned one during the call.",
         type: "checkbox",
-        default: true, 
+        default: true,
         attribute: "force_ticket_creation"
     },
     {
@@ -194,28 +194,32 @@ const valueChecks = (setting, value, attrName) => {
 }
 
 const applyAttributes = async (session) => {
-    if (!session.appConfig.length) {
-        await init(session);
-        session.appConfig.forEach((setting) => session.zafInfo.settings[setting.name] = setting.value || setting.default)
-    }
+    try {
+        if (!session.appConfig.length) {
+            await init(session);
+            session.appConfig.forEach((setting) => session.zafInfo.settings[setting.name] = setting.value || setting.default)
+        }
 
-    const attributes = session.contact.getAttributes();
-    console.log(logStamp('Applying config attributes: '), attributes);
-    session.appConfig.forEach((setting) => {
-        if (setting.attribute.trim()) { // attribute name must be a non-empty string, ignore if empty
-            const attribute = attributes[setting.attribute];
-            if (attribute) {
-                const attrValue = attribute.value;
-                if (!(['', '-', 'none', 'empty', 'ignore', 'timeout'].includes(attrValue.toLowerCase().trim()) 
-                    || !valueChecks(setting, attrValue, attribute.name))) {
-                    let value = attrValue;
-                    if (setting.type === 'number') value = attrValue * 1;
-                    if (setting.type === 'checkbox') value = ['true', 't', '1', 'yes', 'y'].includes(attrValue);
-                    session.zafInfo.settings[setting.name] = value;
+        const attributes = session.contact.getAttributes();
+        console.log(logStamp('Applying config attributes: '), attributes);
+        session.appConfig.forEach((setting) => {
+            if (setting.attribute.trim()) { // attribute name must be a non-empty string, ignore if empty
+                const attribute = attributes[setting.attribute];
+                if (attribute) {
+                    const attrValue = attribute.value;
+                    if (!(['', '-', 'none', 'empty', 'ignore', 'timeout'].includes(attrValue.toLowerCase().trim())
+                        || !valueChecks(setting, attrValue, attribute.name))) {
+                        let value = attrValue;
+                        if (setting.type === 'number') value = attrValue * 1;
+                        if (setting.type === 'checkbox') value = ['true', 't', '1', 'yes', 'y'].includes(attrValue);
+                        session.zafInfo.settings[setting.name] = value;
+                    }
                 }
             }
-        }
-    });
+        });
+    } catch (err) {
+        console.error(logStamp('Error applying attributes: '), err);
+    }
 }
 
 export default { applyAttributes }
