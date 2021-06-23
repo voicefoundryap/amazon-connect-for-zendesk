@@ -29,10 +29,11 @@ const setProcessingTab = () => {
     }
     if (focusedTab !== session.windowId) {
         console.log(logStamp("Contact will be processed in another, focused tab: "), focusedTab);
-        return;
+        return focusedTab;
     }
     localStorage.setItem('vf.processingTab', session.windowId);
     console.log(logStamp('Claimed contact processing in tab: '), session.windowId);
+    return session.windowId;
 }
 
 const handleContactConnecting = async () => {
@@ -307,9 +308,12 @@ export default (contact) => {
     });
 
     contact.onConnected((contact) => {
-        const processingTab = localStorage.getItem('vf.processingTab');
+        let processingTab = localStorage.getItem('vf.processingTab');
+        // should have had the processing tab by now, unless agent is using a desk phone
+        if (!processingTab) {
+            processingTab = setProcessingTab();
+        } 
         if (processingTab !== session.windowId) {
-            console.log(logStamp('onConnected is processed in the other tab: '), processingTab)
             return;
         }
 

@@ -3,34 +3,35 @@ import logStamp from '../util/log.js';
 import session from './session.js';
 import { zafClient } from './zafClient.js';
 import { containerId as callControlsContainerId, resizeId as callControlsResizeId } from '../constants/callControls.js';
+import { dialableNumber } from './phoneNumbers.js'
 
 export const resize = (size) => {
     let height = 510;
     const expand = size === 'full' && !session.ticketAssigned;
 
-    if(size !== callControlsResizeId) {
+    if (size !== callControlsResizeId) {
         if (expand) {
             ui.show('newTicketContainer');
-            height+=80;
+            height += 80;
         } else {
             ui.hide('newTicketContainer');
         }
         const callControlsElement = document.getElementById(callControlsContainerId);
-        if(callControlsElement && callControlsElement.style.display === 'flex'){
-            height+=70;
-        }       
-    }
-    
-    if(size === callControlsResizeId) {
-        const newTicketContainer = document.getElementById('newTicketContainer');
-        if(newTicketContainer && newTicketContainer.style.display === 'block'){
-            height+=80;
+        if (callControlsElement && callControlsElement.style.display === 'flex') {
+            height += 70;
         }
-        ui.show(callControlsContainerId, 'flex')
-        height+=70;
     }
 
-    if(size === 'contactEnded') {
+    if (size === callControlsResizeId) {
+        const newTicketContainer = document.getElementById('newTicketContainer');
+        if (newTicketContainer && newTicketContainer.style.display === 'block') {
+            height += 80;
+        }
+        ui.show(callControlsContainerId, 'flex')
+        height += 70;
+    }
+
+    if (size === 'contactEnded') {
         ui.hide('newTicketcontainer')
         ui.hide(callControlsContainerId)
         height = 510;
@@ -118,14 +119,17 @@ const findUser = async (query, requester = null) => {
         }
         const user = await Promise.any(users.map((user) => (async (user, query) => {
             const userIdentities = await getFromZD(`users/${user.id}/identities`, 'identities', []);
-            if (userIdentities.some((identity) => identity.type === 'phone_number' && identity.value.replace(/[ \.\(\)-]/g, '') === query)) {
+            if (userIdentities.some((identity) => identity.type === 'phone_number' && dialableNumber(identity.value).endsWith(query))) {
                 console.log(logStamp(`Matched query ${query} with user `), user);
                 return user;
             } else return Promise.reject();
         })(user, query))).catch(() => null);
-        if (user)
-            console.log(logStamp('Found existing user'), user.name);
-        return user;
+        if (user) {
+            return user;
+        } else {
+            console.log(logStamp('None of the returned users identities matched the query '), query);
+            return null;
+        }
     }
     console.log(logStamp(`User with query ${query} not found`), users);
     return null;
@@ -194,9 +198,10 @@ export const resolveUser = async (contact, requester = null, dialOut = null) => 
 export const validateTicket = async (ticketId) => {
     console.log(logStamp('Searching for ticket by number: '), ticketId);
     const ticket = await getFromZD(`tickets/${ticketId}.json`, 'ticket');
-    return ticket 
-        ? { 
-            ticketId: ticket.id, 
-            requester: ticket.requester_id }
-        : {}    
+    return ticket
+        ? {
+            ticketId: ticket.id,
+            requester: ticket.requester_id
+        }
+        : {}
 }
