@@ -57,7 +57,7 @@ Metadata:
     - Sentiment
     - Transcript
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/contact-lens
-    SemanticVersion: 1.0.1
+    SemanticVersion: 1.0.2
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/contact-lens
 Resources:
   tableZendeskRetries:
@@ -85,7 +85,7 @@ Resources:
         and updates the matching Zendesk support ticket
       Runtime: nodejs12.x
       Handler: index.handler
-      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens/b8dc42d486cebb09d843c1462d389e3f
+      CodeUri: s3://214558022353-connect-zendesk-ap-southeast-2/zendesk-add-ons/contact-lens/f06f4120b2a29457f16fa97eeaae66bb
       Timeout: 240
       Policies:
       - AWSLambdaBasicExecutionRole
