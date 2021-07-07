@@ -27,7 +27,7 @@ const buildOverallSentiment = (analysis, side) => {
     const negativeRate = calcSentimentRate('NEGATIVE');
     const neutralRate = calcSentimentRate('NEUTRAL');
     const mixedRate = 100 - (positiveRate + negativeRate + neutralRate);
-    return `<p><strong>${side}</strong> overal sentiment: ${overallLabel}</p>` +
+    return `<p><strong>${side}</strong> overall sentiment: ${overallLabel}</p>` +
         `<p>Positive: ${positiveRate}%</p><p>Negative: ${negativeRate}%</p><p>Neutral: ${neutralRate}%</p><p>Mixed: ${mixedRate}%</p>`;
 };
 
