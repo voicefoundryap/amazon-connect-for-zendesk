@@ -49,7 +49,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['Connnect','Contact-Lens', 'Zendesk', 'Sentiment', 'Transcript']
     HomePageUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/contact-lens
-    SemanticVersion: 1.0.1
+    SemanticVersion: 1.0.2
     SourceCodeUrl: https://github.com/voicefoundryap/amazon-connect-for-zendesk/tree/master/add-ons/contact-lens
 
 Resources:
